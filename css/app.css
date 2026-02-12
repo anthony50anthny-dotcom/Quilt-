@@ -238,3 +238,21 @@ h1 {
   padding: 6px;
   border-radius: 4px;
 }
+#calcPanelInner label {
+  display: block;
+  margin-bottom: 8px;
+}
+
+#calcPanelInner input[type="number"] {
+  width: 80px;
+  margin-left: 6px;
+}
+
+#calcStripsBtn {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+#stripCalcOutput {
+  line-height: 1.4;
+}
