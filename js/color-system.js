@@ -1,11 +1,11 @@
 // ===== COLOR ELEMENTS =====
-const colorInput = document.getElementById('colorInput');
-const colorR = document.getElementById('colorR');
-const colorG = document.getElementById('colorG');
-const colorB = document.getElementById('colorB');
+window.colorInput = document.getElementById('colorInput');
+window.colorR = document.getElementById('colorR');
+window.colorG = document.getElementById('colorG');
+window.colorB = document.getElementById('colorB');
 
-const presetSwatches = document.querySelectorAll('.color-palette .color-swatch');
-const savedSwatches = document.querySelectorAll('.saved-swatch');
+window.presetSwatches = document.querySelectorAll('.color-palette .color-swatch');
+window.savedSwatches = document.querySelectorAll('.saved-swatch');
 
 // ===== COLOR HELPERS =====
 function componentToHex(c) {
@@ -33,59 +33,55 @@ function hexToRgb(hex) {
 
 // ===== SET COLOR FROM HEX =====
 function setColorFromHex(hex) {
-  colorInput.value = hex;
+  window.colorInput.value = hex;
   const { r, g, b } = hexToRgb(hex);
-  colorR.value = r;
-  colorG.value = g;
-  colorB.value = b;
+  window.colorR.value = r;
+  window.colorG.value = g;
+  window.colorB.value = b;
 }
 
 // ===== UPDATE FROM RGB =====
 function updateFromRGB() {
-  const r = Math.max(0, Math.min(255, parseInt(colorR.value, 10) || 0));
-  const g = Math.max(0, Math.min(255, parseInt(colorG.value, 10) || 0));
-  const b = Math.max(0, Math.min(255, parseInt(colorB.value, 10) || 0));
+  const r = Math.max(0, Math.min(255, parseInt(window.colorR.value, 10) || 0));
+  const g = Math.max(0, Math.min(255, parseInt(window.colorG.value, 10) || 0));
+  const b = Math.max(0, Math.min(255, parseInt(window.colorB.value, 10) || 0));
 
-  colorR.value = r;
-  colorG.value = g;
-  colorB.value = b;
+  window.colorR.value = r;
+  window.colorG.value = g;
+  window.colorB.value = b;
 
   const hex = rgbToHex(r, g, b);
-  colorInput.value = hex;
+  window.colorInput.value = hex;
 }
 
 // ===== EVENT LISTENERS =====
-colorInput.addEventListener('input', () => {
-  setColorFromHex(colorInput.value);
+window.colorInput.addEventListener('input', () => {
+  setColorFromHex(window.colorInput.value);
 });
 
-colorR.addEventListener('input', updateFromRGB);
-colorG.addEventListener('input', updateFromRGB);
-colorB.addEventListener('input', updateFromRGB);
-
+window.colorR.addEventListener('input', updateFromRGB);
+window.colorG.addEventListener('input', updateFromRGB);
+window.colorB.addEventListener('input', updateFromRGB);
 
 // ===== PRESET SWATCHES =====
-presetSwatches.forEach(swatch => {
+window.presetSwatches.forEach(swatch => {
   swatch.addEventListener('click', () => {
     const hex = swatch.getAttribute('data-color');
     setColorFromHex(hex);
   });
 });
 
-
 // ===== SAVED SWATCHES =====
-savedSwatches.forEach(swatch => {
+window.savedSwatches.forEach(swatch => {
   swatch.addEventListener('click', () => {
     const savedColor = swatch.getAttribute('data-color');
 
     if (!savedColor) {
-      // Save new color
-      const hex = colorInput.value;
+      const hex = window.colorInput.value;
       swatch.setAttribute('data-color', hex);
       swatch.style.background = hex;
       swatch.classList.remove('empty');
     } else {
-      // Load saved color
       setColorFromHex(savedColor);
     }
   });
@@ -98,6 +94,5 @@ savedSwatches.forEach(swatch => {
   });
 });
 
-
 // ===== INITIALIZE =====
-setColorFromHex(colorInput.value);
+setColorFromHex(window.colorInput.value);
