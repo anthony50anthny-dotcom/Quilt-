@@ -1,182 +1,42 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Quilt Planner</title>
+document.addEventListener("DOMContentLoaded", () => {
 
-  <!-- Link to your CSS file -->
-  <link rel="stylesheet" href="css/app.css" />
-</head>
+  // ===== INITIALIZE ZOOM =====
+  zoomSlider.addEventListener('input', () => {
+    updateZoom();
+  });
 
-<body>
-  <h1>Quilt Planner</h1>
+  // ===== BUILD GRID BUTTON =====
+  document.getElementById('buildGridBtn').addEventListener('click', () => {
+    buildGrid();
+  });
 
-  <!-- MAIN LAYOUT -->
-  <div class="main-layout">
+  // ===== TOGGLE SASHING =====
+  document.getElementById('toggleSashingBtn').addEventListener('click', () => {
+    window.sashingEnabled = !window.sashingEnabled;
+    buildGrid();
+  });
 
-    <!-- LEFT PANEL -->
-    <div class="panel controls">
-      <h2>Quilt Settings</h2>
+  // ===== TOGGLE SASHING BORDER =====
+  document.getElementById('toggleSashingBorderBtn').addEventListener('click', () => {
+    window.sashingBorderEnabled = !window.sashingBorderEnabled;
+    buildGrid();
+  });
 
-      <label>Rows (blocks)
-        <input type="number" id="rowsInput" value="3" min="1" />
-      </label>
+  // ===== CALCULATE FABRIC =====
+  document.getElementById('calcFabricBtn').addEventListener('click', () => {
+    const result = calculateFabric();
+    document.getElementById('fabricOutput').textContent = result;
+  });
 
-      <label>Columns (blocks)
-        <input type="number" id="colsInput" value="3" min="1" />
-      </label>
+  // ===== CALCULATOR PANEL TOGGLE =====
+  document.getElementById('calcTab').addEventListener('click', () => {
+    document.getElementById('calcPanel').classList.toggle('open');
+  });
 
-      <label>Block width (inches)
-        <input type="number" id="blockWidthInput" value="15" min="1" />
-      </label>
+  // ===== INITIAL BUILD =====
+  buildGrid();
+  updateZoom();
 
-      <label>Block height (inches)
-        <input type="number" id="blockHeightInput" value="18" min="1" />
-      </label>
-
-      <label>Sashing width (inches)</label>
-      <div class="inline-row">
-        <input type="number" id="sashingWidthInput" value="2" min="0" />
-        <div class="color-box" id="sashingColorBox" style="background:#bfbfbf;">
-          <input type="color" id="sashingColorPicker" value="#bfbfbf" />
-        </div>
-      </div>
-
-      <label>Sashing Border width (inches)</label>
-      <div class="inline-row">
-        <input type="number" id="sashingBorderWidthInput" value="2" min="0" />
-        <div class="color-box" id="sashingBorderColorBox" style="background:#666666;">
-          <input type="color" id="sashingBorderColorPicker" value="#666666" />
-        </div>
-      </div>
-
-      <label>Border width (inches)</label>
-      <div class="inline-row">
-        <input type="number" id="borderWidthInput" value="4" min="0" />
-        <div class="color-box" id="borderColorBox" style="background:#8c8c8c;">
-          <input type="color" id="borderColorPicker" value="#8c8c8c" />
-        </div>
-      </div>
-
-      <label>Active Color
-        <input type="color" id="colorInput" value="#ffcc00" />
-      </label>
-
-      <div class="color-section">
-        <h3>RGB</h3>
-        <div class="color-rgb-row">
-          <label>R
-            <input type="number" id="colorR" min="0" max="255" value="255" />
-          </label>
-          <label>G
-            <input type="number" id="colorG" min="0" max="255" value="204" />
-          </label>
-          <label>B
-            <input type="number" id="colorB" min="0" max="255" value="0" />
-          </label>
-        </div>
-
-        <h3>Preset Colors</h3>
-        <div class="color-palette">
-          <div class="color-swatch" data-color="#ffffff" style="background:#ffffff;"></div>
-          <div class="color-swatch" data-color="#d9d9d9" style="background:#d9d9d9;"></div>
-          <div class="color-swatch" data-color="#555555" style="background:#555555;"></div>
-          <div class="color-swatch" data-color="#000000" style="background:#000000;"></div>
-          <div class="color-swatch" data-color="#ff0000" style="background:#ff0000;"></div>
-          <div class="color-swatch" data-color="#0066ff" style="background:#0066ff;"></div>
-          <div class="color-swatch" data-color="#00aa55" style="background:#00aa55;"></div>
-          <div class="color-swatch" data-color="#d4af37" style="background:#d4af37;"></div>
-        </div>
-
-        <h3>Saved Colors</h3>
-        <div class="color-saved-row">
-          <div class="color-swatch empty saved-swatch" data-index="0"></div>
-          <div class="color-swatch empty saved-swatch" data-index="1"></div>
-          <div class="color-swatch empty saved-swatch" data-index="2"></div>
-          <div class="color-swatch empty saved-swatch" data-index="3"></div>
-          <div class="color-swatch empty saved-swatch" data-index="4"></div>
-          <div class="color-swatch empty saved-swatch" data-index="5"></div>
-        </div>
-      </div>
-
-      <button id="buildGridBtn">Build / Update Grid</button>
-      <button id="toggleSashingBtn">Toggle Sashing On/Off</button>
-      <button id="toggleSashingBorderBtn">Toggle Sashing Border On/Off</button>
-    </div>
-
-    <!-- GRID PANEL -->
-    <div class="panel grid-wrapper">
-      <div class="zoom-row">
-        <strong>Zoom:</strong>
-        <input type="range" id="zoomSlider" min="50" max="200" value="100" />
-        <span id="zoomLabel">100%</span>
-      </div>
-
-      <div id="quiltOuter">
-        <div id="quiltGrid"></div>
-      </div>
-    </div>
-
-  </div> <!-- end main-layout -->
-
-  <!-- CALCULATOR PANEL -->
-  <div id="calcPanel">
-    <div id="calcTab">Calculators</div>
-    <div id="calcPanelInner">
-      <h2>Quilt Calculators</h2>
-
-      <!-- FABRIC YARDAGE -->
-      <label>Fabric width (WOF, inches)
-        <input type="number" id="wofInput" value="42" min="20" />
-      </label>
-
-      <label>Seam allowance (inches, per side)
-        <input type="number" id="seamInput" value="0.25" step="0.0625" min="0" />
-      </label>
-
-      <button id="calcFabricBtn">Calculate Fabric Yardage</button>
-
-      <div class="calc-output" id="fabricOutput"></div>
-
-      <hr>
-
-      <!-- QUILT SIZE CALCULATOR -->
-      <h3>Quilt Size</h3>
-      <div id="quiltSizeOutput" class="calc-output">
-        Width: —<br>
-        Height: —<br>
-      </div>
-
-      <hr>
-
-      <!-- STRIP CALCULATOR -->
-      <h3>Strip Calculator</h3>
-
-      <label>Strip Width (inches):
-        <input type="number" id="stripWidthInput" value="2.5" min="0" step="0.25">
-      </label>
-
-      <label>Total Finished Length Needed (inches):
-        <input type="number" id="stripLengthInput" value="100" min="0">
-      </label>
-
-      <button id="calcStripsBtn">Calculate Strips</button>
-
-      <div id="stripCalcOutput" class="calc-output">
-        Strips per WOF: —<br>
-        Total Strips Needed: —<br>
-        Total Inches: —<br>
-        Yardage: —<br>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- SCRIPT FILES -->
-  <script src="js/grid.js"></script>
-  <script src="js/color-system.js"></script>
-  <script src="js/calculator.js"></script>
-  <script src="js/main.js"></script>
-
+});
 </body>
 </html>
