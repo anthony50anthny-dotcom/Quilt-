@@ -3,25 +3,21 @@
 // =========================
 
 // Quilt settings inputs
-const rowsInput = document.getElementById("rowsInput");
-const colsInput = document.getElementById("colsInput");
-const blockWidthInput = document.getElementById("blockWidthInput");
-const blockHeightInput = document.getElementById("blockHeightInput");
-const sashingWidthInput = document.getElementById("sashingWidthInput");
-const sashingBorderWidthInput = document.getElementById("sashingBorderWidthInput");
-const borderWidthInput = document.getElementById("borderWidthInput");
+window.rowsInput = document.getElementById("rowsInput");
+window.colsInput = document.getElementById("colsInput");
+window.blockWidthInput = document.getElementById("blockWidthInput");
+window.blockHeightInput = document.getElementById("blockHeightInput");
+window.sashingWidthInput = document.getElementById("sashingWidthInput");
+window.sashingBorderWidthInput = document.getElementById("sashingBorderWidthInput");
+window.borderWidthInput = document.getElementById("borderWidthInput");
 
 // Strip calculator inputs
-const stripWidthInput = document.getElementById("stripWidthInput");
-const stripLengthInput = document.getElementById("stripLengthInput");
+window.sashStripWidthInput = document.getElementById("sashStripWidthInput");
+window.bindingStripWidthInput = document.getElementById("bindingStripWidthInput");
 
 // Fabric calculator inputs
-const wofInput = document.getElementById("wofInput");
-const seamInput = document.getElementById("seamInput");
-
-// These come from main.js — but we define safe defaults here
-window.sashingEnabled = window.sashingEnabled ?? true;
-window.sashingBorderEnabled = window.sashingBorderEnabled ?? true;
+window.wofInput = document.getElementById("wofInput");
+window.seamInput = document.getElementById("seamInput");
 
 
 // =========================
@@ -88,15 +84,13 @@ function formatYards(yards) {
 // =========================
 
 function getQuiltDimensions() {
-  const rows = parseInt(rowsInput.value, 10) || 1;
-  const cols = parseInt(colsInput.value, 10) || 1;
-  const bw = parseFloat(blockWidthInput.value) || 1;
-  const bh = parseFloat(blockHeightInput.value) || 1;
-  const sashW = parseFloat(sashingWidthInput.value) || 0;
-  const sashBorderW = (window.sashingBorderEnabled && parseFloat(sashingBorderWidthInput.value) > 0)
-    ? parseFloat(sashingBorderWidthInput.value)
-    : 0;
-  const borderW = parseFloat(borderWidthInput.value) || 0;
+  const rows = parseInt(window.rowsInput.value, 10) || 1;
+  const cols = parseInt(window.colsInput.value, 10) || 1;
+  const bw = parseFloat(window.blockWidthInput.value) || 1;
+  const bh = parseFloat(window.blockHeightInput.value) || 1;
+  const sashW = parseFloat(window.sashingWidthInput.value) || 0;
+  const sashBorderW = (window.sashingBorderEnabled ? parseFloat(window.sashingBorderWidthInput.value) || 0 : 0);
+  const borderW = parseFloat(window.borderWidthInput.value) || 0;
 
   const coreWidth =
     cols * bw + (cols - 1) * (window.sashingEnabled ? sashW : 0);
@@ -120,31 +114,15 @@ function getQuiltDimensions() {
 
 
 // =========================
-// QUILT SIZE CALCULATOR
-// =========================
-
-function updateQuiltSize() {
-  const { totalWidth, totalHeight } = getQuiltDimensions();
-
-  const out = document.getElementById("quiltSizeOutput");
-  if (!out) return;
-
-  out.innerHTML =
-    `Width: ${totalWidth.toFixed(1)} inches<br>` +
-    `Height: ${totalHeight.toFixed(1)} inches`;
-}
-
-
-// =========================
-// MAIN FABRIC CALCULATOR
+// FABRIC YARDAGE CALCULATOR
 // =========================
 
 function calculateFabric() {
   const { rows, cols, bw, bh, sashW, sashBorderW, borderW, coreWidth, coreHeight, totalWidth, totalHeight } =
     getQuiltDimensions();
 
-  const wof = parseFloat(wofInput.value) || 42;
-  const seam = parseFloat(seamInput.value) || 0;
+  const wof = parseFloat(window.wofInput.value) || 42;
+  const seam = parseFloat(window.seamInput.value) || 0;
 
   // BLOCKS
   const blockCutW = bw + 2 * seam;
@@ -163,10 +141,8 @@ function calculateFabric() {
     const vertLen = coreHeight + 2 * seam;
     const horizLen = coreWidth + 2 * seam;
 
-    const vertArea = vertCount * cutW * vertLen;
-    const horizArea = horizCount * cutW * horizLen;
-
-    sashingYards = roundToEighth((vertArea + horizArea) / (wof * 36));
+    const totalArea = vertCount * cutW * vertLen + horizCount * cutW * horizLen;
+    sashingYards = roundToEighth(totalArea / (wof * 36));
   }
 
   // SASHING BORDER
@@ -180,10 +156,8 @@ function calculateFabric() {
     const vertLen = innerH + 2 * sashBorderW + 2 * seam;
     const horizLen = innerW + 2 * sashBorderW + 2 * seam;
 
-    const vertArea = 2 * cutW * vertLen;
-    const horizArea = 2 * cutW * horizLen;
-
-    sashBorderYards = roundToEighth((vertArea + horizArea) / (wof * 36));
+    const totalArea = 2 * cutW * vertLen + 2 * cutW * horizLen;
+    sashBorderYards = roundToEighth(totalArea / (wof * 36));
   }
 
   // OUTER BORDER
@@ -197,20 +171,30 @@ function calculateFabric() {
     const vertLen = innerH + 2 * borderW + 2 * seam;
     const horizLen = innerW + 2 * borderW + 2 * seam;
 
-    const vertArea = 2 * cutW * vertLen;
-    const horizArea = 2 * cutW * horizLen;
-
-    borderYards = roundToEighth((vertArea + horizArea) / (wof * 36));
+    const totalArea = 2 * cutW * vertLen + 2 * cutW * horizLen;
+    borderYards = roundToEighth(totalArea / (wof * 36));
   }
 
   // BACKING
   const panels = Math.max(1, Math.ceil(totalWidth / wof));
   let backingYards = roundToEighth((panels * totalHeight) / 36);
 
+  // BINDING (strip-based)
+  const bindStripW = parseFloat(window.bindingStripWidthInput.value) || 0;
+  const perimeter = 2 * (totalWidth + totalHeight);
+  const stripsBinding = Math.ceil(perimeter / wof);
+  let bindingYards = roundToEighth((stripsBinding * bindStripW) / 36);
+
   // TOTAL
-  const totalYards = roundToEighth(
-    blockYards + sashingYards + sashBorderYards + borderYards + backingYards
-  );
+  const totalYards =
+    blockYards +
+    sashingYards +
+    sashBorderYards +
+    borderYards +
+    backingYards +
+    bindingYards;
+
+  const roundedTotal = roundToEighth(totalYards);
 
   // OUTPUT
   let text = "";
@@ -219,8 +203,9 @@ function calculateFabric() {
   text += `Sashing Border: ${formatYards(sashBorderYards)} yards\n`;
   text += `Border:         ${formatYards(borderYards)} yards\n`;
   text += `Backing:        ${formatYards(backingYards)} yards\n`;
+  text += `Binding:        ${formatYards(bindingYards)} yards\n`;
   text += "-----------------------------\n";
-  text += `Total:          ${formatYards(totalYards)} yards`;
+  text += `Total:          ${formatYards(roundedTotal)} yards`;
 
   return text;
 }
@@ -231,20 +216,52 @@ function calculateFabric() {
 // =========================
 
 function calculateStrips() {
-  const stripW = parseFloat(stripWidthInput.value) || 0;
-  const neededLength = parseFloat(stripLengthInput.value) || 0;
-  const wof = parseFloat(wofInput.value) || 42;
+  const sashStripW = parseFloat(window.sashStripWidthInput.value) || 0;
+  const bindStripW = parseFloat(window.bindingStripWidthInput.value) || 0;
+  const wof = parseFloat(window.wofInput.value) || 42;
 
-  const stripsPerWOF = Math.floor(wof / stripW);
-  const totalStrips = Math.ceil(neededLength / wof);
-  const totalInches = totalStrips * wof;
+  const { rows, cols, coreWidth, coreHeight, totalWidth, totalHeight } = getQuiltDimensions();
+
+  // SASHING STRIPS
+  const vertCount = Math.max(cols - 1, 0);
+  const horizCount = Math.max(rows - 1, 0);
+
+  const totalSashingInches =
+    vertCount * coreHeight +
+    horizCount * coreWidth;
+
+  const stripsSashing = Math.ceil(totalSashingInches / wof);
+
+  // SASHING BORDER STRIPS
+  const innerW = coreWidth;
+  const innerH = coreHeight;
+
+  const totalSashBorderInches = 2 * (innerW + innerH);
+  const stripsSashBorder = Math.ceil(totalSashBorderInches / wof);
+
+  // BINDING STRIPS
+  const perimeter = 2 * (totalWidth + totalHeight);
+  const stripsBinding = Math.ceil(perimeter / wof);
+
+  // TOTAL STRIPS
+  const totalStrips = stripsSashing + stripsSashBorder + stripsBinding;
+
+  // TOTAL INCHES
+  const totalInches =
+    stripsSashing * sashStripW +
+    stripsSashBorder * sashStripW +
+    stripsBinding * bindStripW;
+
   const yards = roundToEighth(totalInches / 36);
 
+  // OUTPUT
   const out = document.getElementById("stripCalcOutput");
   out.innerHTML =
-    `Strips per WOF: ${stripsPerWOF}<br>` +
-    `Total Strips Needed: ${totalStrips}<br>` +
-    `Total Inches: ${totalInches}<br>` +
+    `Sashing Strips Needed: ${stripsSashing}<br>` +
+    `Sashing Border Strips Needed: ${stripsSashBorder}<br>` +
+    `Binding Strips Needed: ${stripsBinding}<br>` +
+    `Total Strips: ${totalStrips}<br>` +
+    `Total Inches: ${totalInches.toFixed(1)}<br>` +
     `Yardage: ${formatYards(yards)} yards`;
 }
 
@@ -254,24 +271,10 @@ function calculateStrips() {
 // =========================
 
 document.getElementById("calcFabricBtn").addEventListener("click", () => {
-  document.getElementById("fabricOutput").innerText = calculateFabric();
+  document.getElementById("fabricOutput").textContent = calculateFabric();
 });
 
 document.getElementById("calcStripsBtn").addEventListener("click", calculateStrips);
-
-[
-  rowsInput,
-  colsInput,
-  blockWidthInput,
-  blockHeightInput,
-  sashingWidthInput,
-  sashingBorderWidthInput,
-  borderWidthInput
-].forEach(el => {
-  el.addEventListener("input", updateQuiltSize);
-});
-
-updateQuiltSize();
 
 
 // =========================
