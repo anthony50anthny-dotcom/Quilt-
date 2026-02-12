@@ -50,6 +50,21 @@ function formatYards(yards) {
   return toMixedFraction(yards, 4);
 }
 
+// ===== STRIP-BASED YARDAGE HELPER =====
+function stripYardage(stripWidth, stripLengths, wof) {
+  if (stripWidth <= 0) return 0;
+
+  const stripsPerWOF = Math.floor(wof / stripWidth);
+  if (stripsPerWOF < 1) return Infinity;
+
+  const totalStrips = stripLengths.length;
+  const wofCuts = Math.ceil(totalStrips / stripsPerWOF);
+
+  const totalInches = stripLengths.reduce((a, b) => a + b, 0);
+
+  return totalInches / 36;
+}
+
 // ===== GET QUILT DIMENSIONS =====
 function getQuiltDimensions() {
   const rows = parseInt(rowsInput.value, 10) || 1;
@@ -90,77 +105,77 @@ function calculateFabric() {
   const wof = parseFloat(wofInput.value) || 42;
   const seam = parseFloat(seamInput.value) || 0;
 
-  // Blocks
+  // ===== BLOCKS (area-based is fine) =====
   const blockCutW = bw + 2 * seam;
   const blockCutH = bh + 2 * seam;
   const blockArea = blockCutW * blockCutH * rows * cols;
   let blockYards = blockArea / (wof * 36);
   blockYards = roundToQuarter(blockYards);
 
-  // Sashing
+  // ===== SASHING (strip-based) =====
   let sashingYards = 0;
   if (sashingEnabled && sashW > 0) {
-    const sashCutW = sashW + 2 * seam;
+    const cutW = sashW + 2 * seam;
+    const stripLengths = [];
 
-    const vertCount = Math.max(cols - 1, 0);
-    const vertLenFinished = coreHeight;
-    const vertCutLen = vertLenFinished + 2 * seam;
-    const vertArea = vertCount * sashCutW * vertCutLen;
+    // Vertical sashing strips
+    for (let i = 0; i < cols - 1; i++) {
+      stripLengths.push(coreHeight + 2 * seam);
+    }
 
-    const horizCount = Math.max(rows - 1, 0);
-    const horizLenFinished = coreWidth;
-    const horizCutLen = horizLenFinished + 2 * seam;
-    const horizArea = horizCount * sashCutW * horizCutLen;
+    // Horizontal sashing strips
+    for (let i = 0; i < rows - 1; i++) {
+      stripLengths.push(coreWidth + 2 * seam);
+    }
 
-    sashingYards = (vertArea + horizArea) / (wof * 36);
+    sashingYards = stripYardage(cutW, stripLengths, wof);
     sashingYards = roundToQuarter(sashingYards);
   }
 
-  // Sashing Border
+  // ===== SASHING BORDER (strip-based) =====
   let sashBorderYards = 0;
   if (sashingBorderEnabled && sashBorderW > 0) {
-    const borderCutW = sashBorderW + 2 * seam;
+    const cutW = sashBorderW + 2 * seam;
+
     const innerW = coreWidth;
     const innerH = coreHeight;
 
-    const vertLenFinished = innerH + 2 * sashBorderW;
-    const horizLenFinished = innerW + 2 * sashBorderW;
+    const stripLengths = [
+      innerH + 2 * sashBorderW + 2 * seam,
+      innerH + 2 * sashBorderW + 2 * seam,
+      innerW + 2 * sashBorderW + 2 * seam,
+      innerW + 2 * sashBorderW + 2 * seam
+    ];
 
-    const vertCutLen = vertLenFinished + 2 * seam;
-    const horizCutLen = horizLenFinished + 2 * seam;
-
-    const vertArea = 2 * borderCutW * vertCutLen;
-    const horizArea = 2 * borderCutW * horizCutLen;
-
-    sashBorderYards = (vertArea + horizArea) / (wof * 36);
+    sashBorderYards = stripYardage(cutW, stripLengths, wof);
     sashBorderYards = roundToQuarter(sashBorderYards);
   }
 
-  // Outer Border
+  // ===== OUTER BORDER (strip-based) =====
   let borderYards = 0;
   if (borderW > 0) {
-    const borderCutW = borderW + 2 * seam;
+    const cutW = borderW + 2 * seam;
+
     const innerW = coreWidth + 2 * sashBorderW;
     const innerH = coreHeight + 2 * sashBorderW;
 
-    const vertLenFinished = innerH + 2 * borderW;
-    const horizLenFinished = innerW + 2 * borderW;
+    const stripLengths = [
+      innerH + 2 * borderW + 2 * seam,
+      innerH + 2 * borderW + 2 * seam,
+      innerW + 2 * borderW + 2 * seam,
+      innerW + 2 * borderW + 2 * seam
+    ];
 
-    const vertCutLen = vertLenFinished + 2 * seam;
-    const horizCutLen = horizLenFinished + 2 * seam;
-
-    const vertArea = 2 * borderCutW * vertCutLen;
-    const horizArea = 2 * borderCutW * horizCutLen;
-
-    borderYards = (vertArea + horizArea) / (wof * 36);
+    borderYards = stripYardage(cutW, stripLengths, wof);
     borderYards = roundToQuarter(borderYards);
   }
 
-  // Backing
+  // ===== BACKING (panel-based) =====
   const panels = Math.max(1, Math.ceil(totalWidth / wof));
   let backingYards = (panels * totalHeight) / 36;
   backingYards = roundToQuarter(backingYards);
 
+  // ===== TOTAL =====
   const totalYards =
     blockYards + sashingYards + sashBorderYards + borderYards + backingYards;
   const roundedTotal = roundToQuarter(totalYards);
