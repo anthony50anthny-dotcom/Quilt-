@@ -1,63 +1,63 @@
 // ===== GRID ELEMENTS =====
-const quiltGrid = document.getElementById('quiltGrid');
-const zoomSlider = document.getElementById('zoomSlider');
-const zoomLabel = document.getElementById('zoomLabel');
+window.quiltGrid = document.getElementById('quiltGrid');
+window.zoomSlider = document.getElementById('zoomSlider');
+window.zoomLabel = document.getElementById('zoomLabel');
 
 // ===== INPUTS =====
-const rowsInput = document.getElementById('rowsInput');
-const colsInput = document.getElementById('colsInput');
-const blockWidthInput = document.getElementById('blockWidthInput');
-const blockHeightInput = document.getElementById('blockHeightInput');
+window.rowsInput = document.getElementById('rowsInput');
+window.colsInput = document.getElementById('colsInput');
+window.blockWidthInput = document.getElementById('blockWidthInput');
+window.blockHeightInput = document.getElementById('blockHeightInput');
 
-const sashingWidthInput = document.getElementById('sashingWidthInput');
-const sashingColorPicker = document.getElementById('sashingColorPicker');
+window.sashingWidthInput = document.getElementById('sashingWidthInput');
+window.sashingColorPicker = document.getElementById('sashingColorPicker');
 
-const sashingBorderWidthInput = document.getElementById('sashingBorderWidthInput');
-const sashingBorderColorPicker = document.getElementById('sashingBorderColorPicker');
+window.sashingBorderWidthInput = document.getElementById('sashingBorderWidthInput');
+window.sashingBorderColorPicker = document.getElementById('sashingBorderColorPicker');
 
-const borderWidthInput = document.getElementById('borderWidthInput');
-const borderColorPicker = document.getElementById('borderColorPicker');
+window.borderWidthInput = document.getElementById('borderWidthInput');
+window.borderColorPicker = document.getElementById('borderColorPicker');
 
-const colorInput = document.getElementById('colorInput');
+window.colorInput = document.getElementById('colorInput');
 
 // ===== STATE =====
-let sashingEnabled = true;
-let sashingBorderEnabled = true;
+window.sashingEnabled = true;
+window.sashingBorderEnabled = true;
 
 // ===== CONSTANTS =====
-const pxPerInch = 20;
+window.pxPerInch = 20;
 
 // ===== ZOOM =====
 function updateZoom() {
-  const val = parseInt(zoomSlider.value, 10) || 100;
-  quiltGrid.style.transform = `scale(${val / 100})`;
-  zoomLabel.textContent = val + '%';
+  const val = parseInt(window.zoomSlider.value, 10) || 100;
+  window.quiltGrid.style.transform = `scale(${val / 100})`;
+  window.zoomLabel.textContent = val + '%';
 }
 
 // ===== BUILD GRID =====
 function buildGrid() {
-  const rows = parseInt(rowsInput.value, 10) || 1;
-  const cols = parseInt(colsInput.value, 10) || 1;
-  const bw = parseInt(blockWidthInput.value, 10) || 1;
-  const bh = parseInt(blockHeightInput.value, 10) || 1;
+  const rows = parseInt(window.rowsInput.value, 10) || 1;
+  const cols = parseInt(window.colsInput.value, 10) || 1;
+  const bw = parseInt(window.blockWidthInput.value, 10) || 1;
+  const bh = parseInt(window.blockHeightInput.value, 10) || 1;
 
-  const sashW = parseInt(sashingWidthInput.value, 10) || 0;
-  const sashBorderW = (sashingBorderEnabled ? parseInt(sashingBorderWidthInput.value, 10) || 0 : 0);
-  const borderW = parseInt(borderWidthInput.value, 10) || 0;
+  const sashW = parseInt(window.sashingWidthInput.value, 10) || 0;
+  const sashBorderW = (window.sashingBorderEnabled ? parseInt(window.sashingBorderWidthInput.value, 10) || 0 : 0);
+  const borderW = parseInt(window.borderWidthInput.value, 10) || 0;
 
-  const sashColor = sashingColorPicker.value;
-  const sashBorderColor = sashingBorderColorPicker.value;
-  const borderColor = borderColorPicker.value;
+  const sashColor = window.sashingColorPicker.value;
+  const sashBorderColor = window.sashingBorderColorPicker.value;
+  const borderColor = window.borderColorPicker.value;
 
-  quiltGrid.innerHTML = '';
+  window.quiltGrid.innerHTML = '';
 
   const coreWidthIn =
     cols * bw +
-    (sashingEnabled && sashW > 0 ? (cols - 1) * sashW : 0);
+    (window.sashingEnabled && sashW > 0 ? (cols - 1) * sashW : 0);
 
   const coreHeightIn =
     rows * bh +
-    (sashingEnabled && sashW > 0 ? (rows - 1) * sashW : 0);
+    (window.sashingEnabled && sashW > 0 ? (rows - 1) * sashW : 0);
 
   const totalWidthIn =
     coreWidthIn + 2 * sashBorderW + 2 * borderW;
@@ -65,10 +65,10 @@ function buildGrid() {
   const totalHeightIn =
     coreHeightIn + 2 * sashBorderW + 2 * borderW;
 
-  quiltGrid.style.gridTemplateColumns =
-    `repeat(${totalWidthIn}, ${pxPerInch}px)`;
-  quiltGrid.style.gridTemplateRows =
-    `repeat(${totalHeightIn}, ${pxPerInch}px)`;
+  window.quiltGrid.style.gridTemplateColumns =
+    `repeat(${totalWidthIn}, ${window.pxPerInch}px)`;
+  window.quiltGrid.style.gridTemplateRows =
+    `repeat(${totalHeightIn}, ${window.pxPerInch}px)`;
 
   for (let r = 0; r < totalHeightIn; r++) {
     for (let c = 0; c < totalWidthIn; c++) {
@@ -102,7 +102,7 @@ function buildGrid() {
 
       let inSashing = false;
       if (
-        sashingEnabled &&
+        window.sashingEnabled &&
         sashW > 0 &&
         r >= coreTop &&
         r < coreBottom &&
@@ -144,10 +144,10 @@ function buildGrid() {
       mini.style.backgroundColor = color;
 
       mini.addEventListener('click', () => {
-        mini.style.backgroundColor = colorInput.value;
+        mini.style.backgroundColor = window.colorInput.value;
       });
 
-      quiltGrid.appendChild(mini);
+      window.quiltGrid.appendChild(mini);
     }
   }
 }
@@ -155,6 +155,3 @@ function buildGrid() {
 // ===== EXPORTS =====
 window.buildGrid = buildGrid;
 window.updateZoom = updateZoom;
-window.sashingEnabled = sashingEnabled;
-window.sashingBorderEnabled = sashingBorderEnabled;
-
