@@ -32,7 +32,22 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById('calcTab').addEventListener('click', () => {
     document.getElementById('calcPanel').classList.toggle('open');
   });
+// ===== QUILT SIZE LISTENERS =====
+function attachSizeListeners() {
+  const inputs = [
+    rowsInput, colsInput,
+    blockWidthInput, blockHeightInput,
+    sashingWidthInput, sashingBorderWidthInput,
+    borderWidthInput
+  ];
 
+  inputs.forEach(inp => {
+    inp.addEventListener("input", updateQuiltSizeDisplay);
+  });
+}
+
+attachSizeListeners();
+updateQuiltSizeDisplay();
   // ===== INITIAL BUILD =====
   buildGrid();
   updateZoom();
