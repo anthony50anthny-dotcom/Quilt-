@@ -151,7 +151,109 @@ function buildGrid() {
     }
   }
 }
+// =========================
+// DRAG-TO-FILL (Rectangle Fill)
+// =========================
 
+let isDragging = false;
+let dragStart = null;
+let dragEnd = null;
+let selectionBox = null;
+
+// Convert mouse position to grid cell
+function getCellFromMouse(event) {
+  const rect = quiltGrid.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+
+  const col = Math.floor(x / (window.pxPerInch));
+  const row = Math.floor(y / (window.pxPerInch));
+
+  return { row, col };
+}
+
+// Create selection overlay
+function ensureSelectionBox() {
+  if (!selectionBox) {
+    selectionBox = document.createElement("div");
+    selectionBox.style.position = "absolute";
+    selectionBox.style.background = "rgba(0, 120, 215, 0.25)";
+    selectionBox.style.border = "2px solid #0078d7";
+    selectionBox.style.pointerEvents = "none";
+    selectionBox.style.zIndex = "50";
+    quiltGrid.parentElement.appendChild(selectionBox);
+  }
+}
+
+// Update selection rectangle visuals
+function updateSelectionBox() {
+  if (!dragStart || !dragEnd) return;
+
+  const minRow = Math.min(dragStart.row, dragEnd.row);
+  const maxRow = Math.max(dragStart.row, dragEnd.row);
+  const minCol = Math.min(dragStart.col, dragEnd.col);
+  const maxCol = Math.max(dragStart.col, dragEnd.col);
+
+  const top = minRow * window.pxPerInch;
+  const left = minCol * window.pxPerInch;
+  const width = (maxCol - minCol + 1) * window.pxPerInch;
+  const height = (maxRow - minRow + 1) * window.pxPerInch;
+
+  ensureSelectionBox();
+  selectionBox.style.display = "block";
+  selectionBox.style.top = top + "px";
+  selectionBox.style.left = left + "px";
+  selectionBox.style.width = width + "px";
+  selectionBox.style.height = height + "px";
+}
+
+// Fill all cells in rectangle
+function fillRectangle() {
+  if (!dragStart || !dragEnd) return;
+
+  const minRow = Math.min(dragStart.row, dragEnd.row);
+  const maxRow = Math.max(dragStart.row, dragEnd.row);
+  const minCol = Math.min(dragStart.col, dragEnd.col);
+  const maxCol = Math.max(dragStart.col, dragEnd.col);
+
+  const children = quiltGrid.children;
+
+  for (let r = minRow; r <= maxRow; r++) {
+    for (let c = minCol; c <= maxCol; c++) {
+      const index = r * quiltGrid.style.gridTemplateColumns.split(" ").length + c;
+      const cell = children[index];
+      if (cell) {
+        cell.style.backgroundColor = window.colorInput.value;
+      }
+    }
+  }
+}
+
+// Mouse events
+quiltGrid.addEventListener("mousedown", (e) => {
+  isDragging = true;
+  dragStart = getCellFromMouse(e);
+  dragEnd = { ...dragStart };
+  updateSelectionBox();
+});
+
+quiltGrid.addEventListener("mousemove", (e) => {
+  if (!isDragging) return;
+  dragEnd = getCellFromMouse(e);
+  updateSelectionBox();
+});
+
+document.addEventListener("mouseup", () => {
+  if (!isDragging) return;
+  isDragging = false;
+
+  if (selectionBox) selectionBox.style.display = "none";
+
+  fillRectangle();
+
+  dragStart = null;
+  dragEnd = null;
+});
 // ===== EXPORTS =====
 window.buildGrid = buildGrid;
 window.updateZoom = updateZoom;
