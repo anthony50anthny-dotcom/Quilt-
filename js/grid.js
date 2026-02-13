@@ -170,11 +170,13 @@ let dragStart = null;
 let dragEnd = null;
 let selectionBox = null;
 
-// Convert mouse position to grid cell
+// Convert mouse position to grid cell (ZOOM AWARE)
 function getCellFromMouse(event) {
   const rect = quiltGrid.getBoundingClientRect();
-  const x = event.clientX - rect.left;
-  const y = event.clientY - rect.top;
+  const zoom = parseInt(window.zoomSlider.value, 10) / 100;
+
+  const x = (event.clientX - rect.left) / zoom;
+  const y = (event.clientY - rect.top) / zoom;
 
   const col = Math.floor(x / window.pxPerInch);
   const row = Math.floor(y / window.pxPerInch);
