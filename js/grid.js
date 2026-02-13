@@ -27,6 +27,10 @@ window.sashingBorderEnabled = true;
 // ===== CONSTANTS =====
 window.pxPerInch = 20;
 
+// ===== GRID SIZE TRACKING =====
+window.gridCols = 0;
+window.gridRows = 0;
+
 // ===== ZOOM =====
 function updateZoom() {
   const val = parseInt(window.zoomSlider.value, 10) || 100;
@@ -64,6 +68,10 @@ function buildGrid() {
 
   const totalHeightIn =
     coreHeightIn + 2 * sashBorderW + 2 * borderW;
+
+  // Store grid dimensions for drag-fill indexing
+  window.gridCols = totalWidthIn;
+  window.gridRows = totalHeightIn;
 
   window.quiltGrid.style.gridTemplateColumns =
     `repeat(${totalWidthIn}, ${window.pxPerInch}px)`;
@@ -151,6 +159,8 @@ function buildGrid() {
     }
   }
 }
+
+
 // =========================
 // DRAG-TO-FILL (Rectangle Fill)
 // =========================
@@ -166,8 +176,8 @@ function getCellFromMouse(event) {
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
 
-  const col = Math.floor(x / (window.pxPerInch));
-  const row = Math.floor(y / (window.pxPerInch));
+  const col = Math.floor(x / window.pxPerInch);
+  const row = Math.floor(y / window.pxPerInch);
 
   return { row, col };
 }
@@ -220,7 +230,7 @@ function fillRectangle() {
 
   for (let r = minRow; r <= maxRow; r++) {
     for (let c = minCol; c <= maxCol; c++) {
-      const index = r * quiltGrid.style.gridTemplateColumns.split(" ").length + c;
+      const index = r * window.gridCols + c;
       const cell = children[index];
       if (cell) {
         cell.style.backgroundColor = window.colorInput.value;
@@ -254,6 +264,8 @@ document.addEventListener("mouseup", () => {
   dragStart = null;
   dragEnd = null;
 });
+
+
 // ===== EXPORTS =====
 window.buildGrid = buildGrid;
 window.updateZoom = updateZoom;
