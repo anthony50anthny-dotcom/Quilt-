@@ -193,7 +193,9 @@ function ensureSelectionBox() {
     selectionBox.style.border = "2px solid #0078d7";
     selectionBox.style.pointerEvents = "none";
     selectionBox.style.zIndex = "50";
-    quiltGrid.parentElement.appendChild(selectionBox);
+
+    // IMPORTANT: attach to quiltGrid, not its parent
+    quiltGrid.appendChild(selectionBox);
   }
 }
 
