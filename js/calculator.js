@@ -21,44 +21,23 @@ window.seamInput = document.getElementById("seamInput");
 
 
 // =========================
-// FRACTION + ROUNDING HELPERS
+// FRACTION + ROUNDING HELPERS (1/4 yard rounding)
 // =========================
 
-function roundToEighth(yards) {
+function roundToFourth(yards) {
   if (!isFinite(yards)) return 0;
 
   let whole = Math.floor(yards);
   let frac = yards - whole;
 
-  const steps = [
-    { max: 0.000, val: 0 },
-    { max: 0.125, val: 1/8 },
-    { max: 0.25,  val: 1/4 },
-    { max: 1/3,   val: 1/3 },
-    { max: 0.375, val: 3/8 },
-    { max: 0.5,   val: 1/2 },
-    { max: 0.625, val: 5/8 },
-    { max: 2/3,   val: 2/3 },
-    { max: 0.75,  val: 3/4 },
-    { max: 0.875, val: 7/8 },
-  ];
+  // Round to nearest 1/4
+  const quarter = Math.round(frac * 4) / 4;
 
-  let chosen = null;
-  for (const step of steps) {
-    if (frac <= step.max) {
-      chosen = step.val;
-      break;
-    }
+  if (quarter === 1) {
+    return whole + 1;
   }
 
-  if (chosen === null) {
-    whole += 1;
-    frac = 0;
-  } else {
-    frac = chosen;
-  }
-
-  return whole + frac;
+  return whole + quarter;
 }
 
 function toMixedFraction(value) {
@@ -67,11 +46,12 @@ function toMixedFraction(value) {
   const whole = Math.floor(value);
   const frac = value - whole;
 
-  const eighths = Math.round(frac * 8);
-  if (eighths === 0) return `${whole}`;
-  if (eighths === 8) return `${whole + 1}`;
+  const fourths = Math.round(frac * 4);
 
-  return whole > 0 ? `${whole} ${eighths}/8` : `${eighths}/8`;
+  if (fourths === 0) return `${whole}`;
+  if (fourths === 4) return `${whole + 1}`;
+
+  return whole > 0 ? `${whole} ${fourths}/4` : `${fourths}/4`;
 }
 
 function formatYards(yards) {
@@ -111,9 +91,12 @@ function getQuiltDimensions() {
     totalWidth, totalHeight
   };
 }
+
+
 // =========================
 // QUILT SIZE DISPLAY
 // =========================
+
 function updateQuiltSizeDisplay() {
   const { totalWidth, totalHeight } = getQuiltDimensions();
 
@@ -124,6 +107,7 @@ function updateQuiltSizeDisplay() {
 }
 
 window.updateQuiltSizeDisplay = updateQuiltSizeDisplay;
+
 
 // =========================
 // FABRIC YARDAGE CALCULATOR
@@ -140,7 +124,7 @@ function calculateFabric() {
   const blockCutW = bw + 2 * seam;
   const blockCutH = bh + 2 * seam;
   const blockArea = blockCutW * blockCutH * rows * cols;
-  let blockYards = roundToEighth(blockArea / (wof * 36));
+  let blockYards = roundToFourth(blockArea / (wof * 36));
 
   // SASHING
   let sashingYards = 0;
@@ -154,7 +138,7 @@ function calculateFabric() {
     const horizLen = coreWidth + 2 * seam;
 
     const totalArea = vertCount * cutW * vertLen + horizCount * cutW * horizLen;
-    sashingYards = roundToEighth(totalArea / (wof * 36));
+    sashingYards = roundToFourth(totalArea / (wof * 36));
   }
 
   // SASHING BORDER
@@ -169,7 +153,7 @@ function calculateFabric() {
     const horizLen = innerW + 2 * sashBorderW + 2 * seam;
 
     const totalArea = 2 * cutW * vertLen + 2 * cutW * horizLen;
-    sashBorderYards = roundToEighth(totalArea / (wof * 36));
+    sashBorderYards = roundToFourth(totalArea / (wof * 36));
   }
 
   // OUTER BORDER
@@ -184,18 +168,18 @@ function calculateFabric() {
     const horizLen = innerW + 2 * borderW + 2 * seam;
 
     const totalArea = 2 * cutW * vertLen + 2 * cutW * horizLen;
-    borderYards = roundToEighth(totalArea / (wof * 36));
+    borderYards = roundToFourth(totalArea / (wof * 36));
   }
 
   // BACKING
   const panels = Math.max(1, Math.ceil(totalWidth / wof));
-  let backingYards = roundToEighth((panels * totalHeight) / 36);
+  let backingYards = roundToFourth((panels * totalHeight) / 36);
 
   // BINDING (strip-based)
   const bindStripW = parseFloat(window.bindingStripWidthInput.value) || 0;
   const perimeter = 2 * (totalWidth + totalHeight);
   const stripsBinding = Math.ceil(perimeter / wof);
-  let bindingYards = roundToEighth((stripsBinding * bindStripW) / 36);
+  let bindingYards = roundToFourth((stripsBinding * bindStripW) / 36);
 
   // TOTAL
   const totalYards =
@@ -206,7 +190,7 @@ function calculateFabric() {
     backingYards +
     bindingYards;
 
-  const roundedTotal = roundToEighth(totalYards);
+  const roundedTotal = roundToFourth(totalYards);
 
   // OUTPUT
   let text = "";
@@ -264,7 +248,7 @@ function calculateStrips() {
     stripsSashBorder * sashStripW +
     stripsBinding * bindStripW;
 
-  const yards = roundToEighth(totalInches / 36);
+  const yards = roundToFourth(totalInches / 36);
 
   // OUTPUT
   const out = document.getElementById("stripCalcOutput");
