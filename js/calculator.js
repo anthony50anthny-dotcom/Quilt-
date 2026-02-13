@@ -111,7 +111,19 @@ function getQuiltDimensions() {
     totalWidth, totalHeight
   };
 }
+// =========================
+// QUILT SIZE DISPLAY
+// =========================
+function updateQuiltSizeDisplay() {
+  const { totalWidth, totalHeight } = getQuiltDimensions();
 
+  const out = document.getElementById("quiltSizeOutput");
+  out.innerHTML =
+    `Width: ${totalWidth} inches<br>` +
+    `Height: ${totalHeight} inches`;
+}
+
+window.updateQuiltSizeDisplay = updateQuiltSizeDisplay;
 
 // =========================
 // FABRIC YARDAGE CALCULATOR
