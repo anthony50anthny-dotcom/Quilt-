@@ -1,3 +1,7 @@
+/* ========================= */
+/* GLOBAL */
+/* ========================= */
+
 body {
   font-family: Arial, sans-serif;
   margin: 0;
@@ -8,6 +12,11 @@ body {
 h1 {
   margin: 0 0 16px 0;
 }
+
+/* ========================= */
+/* MAIN LAYOUT */
+/* ========================= */
+
 .main-layout {
   display: flex;
   gap: 20px;
@@ -20,6 +29,11 @@ h1 {
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
+
+/* ========================= */
+/* LEFT CONTROL PANEL */
+/* ========================= */
+
 .controls {
   width: 380px;
   font-size: 15px;
@@ -33,6 +47,7 @@ h1 {
   display: block;
   margin-top: 12px;
 }
+
 .inline-row {
   display: flex;
   align-items: center;
@@ -46,6 +61,8 @@ h1 {
   box-sizing: border-box;
   font-size: 14px;
 }
+
+/* COLOR PICKER BOXES */
 
 .color-box {
   width: 32px;
@@ -63,6 +80,9 @@ h1 {
   opacity: 0;
   cursor: pointer;
 }
+
+/* BUTTONS */
+
 .controls button {
   margin-top: 12px;
   padding: 10px;
@@ -79,6 +99,11 @@ h1 {
 .controls button:hover {
   background: #005fa3;
 }
+
+/* ========================= */
+/* COLOR SECTION */
+/* ========================= */
+
 .color-section {
   margin-top: 20px;
   padding-top: 10px;
@@ -109,6 +134,8 @@ h1 {
   box-sizing: border-box;
   font-size: 13px;
 }
+
+/* COLOR PALETTES */
 
 .color-palette,
 .color-saved-row {
@@ -142,6 +169,11 @@ h1 {
   font-size: 18px;
   color: #888;
 }
+
+/* ========================= */
+/* GRID WRAPPER */
+/* ========================= */
+
 .grid-wrapper {
   flex: 1;
   min-width: 900px;
@@ -183,6 +215,11 @@ h1 {
   background: #ffffff;
   transition: background-color 0.15s ease;
 }
+
+/* ========================= */
+/* SLIDE-OUT CALCULATOR PANEL */
+/* ========================= */
+
 #calcPanel {
   position: fixed;
   top: 80px;
@@ -228,6 +265,8 @@ h1 {
   overflow-y: auto;
 }
 
+/* CALCULATOR OUTPUT */
+
 .calc-output {
   margin-top: 8px;
   font-family: Consolas, monospace;
@@ -238,6 +277,7 @@ h1 {
   padding: 6px;
   border-radius: 4px;
 }
+
 #calcPanelInner label {
   display: block;
   margin-bottom: 8px;
@@ -255,4 +295,80 @@ h1 {
 
 #stripCalcOutput {
   line-height: 1.4;
+}
+/* ========================= */
+/* DARK MODE */
+/* ========================= */
+
+body.dark {
+  background: #1e1e1e;
+  color: #e6e6e6;
+}
+
+/* Panels */
+body.dark .panel {
+  background: #2b2b2b;
+  color: #e6e6e6;
+  border-color: #444;
+}
+
+/* Inputs */
+body.dark input[type="number"],
+body.dark input[type="color"],
+body.dark input[type="text"] {
+  background: #3a3a3a;
+  color: #ffffff;
+  border: 1px solid #666;
+}
+
+/* Buttons */
+body.dark button {
+  background: #005fa3;
+  color: #ffffff;
+}
+
+body.dark button:hover {
+  background: #0077cc;
+}
+
+/* Quilt Outer */
+body.dark #quiltOuter {
+  background: #2b2b2b;
+  border-color: #555;
+}
+
+/* Calculator Panel */
+body.dark #calcPanel {
+  background: #2b2b2b;
+  color: #e6e6e6;
+}
+
+body.dark #calcPanelInner {
+  background: #2b2b2b;
+}
+
+/* Calculator Output */
+body.dark .calc-output {
+  background: #3a3a3a;
+  border-color: #555;
+  color: #ffffff;
+}
+
+/* Dark Mode Toggle Button */
+.dark-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: #0077cc;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+body.dark .dark-toggle {
+  background: #444;
+  color: #fff;
 }
