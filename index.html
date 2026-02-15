@@ -4,107 +4,103 @@
   <meta charset="UTF-8" />
   <title>Quilt Planner</title>
 
-  <!-- Link to your CSS file -->
   <link rel="stylesheet" href="css/app.css" />
 </head>
 
 <body>
+
   <h1>Quilt Planner</h1>
+  <button id="darkModeToggle" class="dark-toggle">Dark Mode</button>
 
   <!-- MAIN LAYOUT -->
   <div class="main-layout">
 
     <!-- LEFT PANEL -->
-    <div class="panel controls">
-      <h2>Quilt Settings</h2>
+<div class="panel controls">
+  <h2>Quilt Settings</h2>
 
-      <label>Rows (blocks)
-        <input type="number" id="rowsInput" value="3" min="1" />
-      </label>
+  <label>Rows (blocks)
+    <input type="number" id="rowsInput" value="3" min="1" />
+  </label>
 
-      <label>Columns (blocks)
-        <input type="number" id="colsInput" value="3" min="1" />
-      </label>
+  <label>Columns (blocks)
+    <input type="number" id="colsInput" value="3" min="1" />
+  </label>
 
-      <label>Block width (inches)
-        <input type="number" id="blockWidthInput" value="15" min="1" />
-      </label>
+  <label>Block width (inches)
+    <input type="number" id="blockWidthInput" value="15" min="1" />
+  </label>
 
-      <label>Block height (inches)
-        <input type="number" id="blockHeightInput" value="18" min="1" />
-      </label>
+  <label>Block height (inches)
+    <input type="number" id="blockHeightInput" value="18" min="1" />
+  </label>
 
-      <label>Sashing width (inches)</label>
-      <div class="inline-row">
-        <input type="number" id="sashingWidthInput" value="2" min="0" />
-        <div class="color-box" id="sashingColorBox" style="background:#bfbfbf;">
-          <input type="color" id="sashingColorPicker" value="#bfbfbf" />
-        </div>
-      </div>
+  <!-- SASHING -->
+  <label>Sashing width (inches)</label>
+  <div class="inline-row">
+    <input type="number" id="sashingWidthInput" value="2" min="0" />
+    <div class="color-box">
+      <input type="color" id="sashingColorPicker" value="#bfbfbf" />
+    </div>
+  </div>
+  <button id="toggleSashingBtn">Toggle Sashing On/Off</button>
 
-      <label>Sashing Border width (inches)</label>
-      <div class="inline-row">
-        <input type="number" id="sashingBorderWidthInput" value="2" min="0" />
-        <div class="color-box" id="sashingBorderColorBox" style="background:#666666;">
-          <input type="color" id="sashingBorderColorPicker" value="#666666" />
-        </div>
-      </div>
+  <!-- SASHING BORDER -->
+  <label>Sashing Border width (inches)</label>
+  <div class="inline-row">
+    <input type="number" id="sashingBorderWidthInput" value="2" min="0" />
+    <div class="color-box">
+      <input type="color" id="sashingBorderColorPicker" value="#666666" />
+    </div>
+  </div>
+  <button id="toggleSashingBorderBtn">Toggle Sashing Border On/Off</button>
 
-      <label>Border width (inches)</label>
-      <div class="inline-row">
-        <input type="number" id="borderWidthInput" value="4" min="0" />
-        <div class="color-box" id="borderColorBox" style="background:#8c8c8c;">
-          <input type="color" id="borderColorPicker" value="#8c8c8c" />
-        </div>
-      </div>
+  <!-- OUTER BORDER -->
+  <label>Border width (inches)</label>
+  <div class="inline-row">
+    <input type="number" id="borderWidthInput" value="4" min="0" />
+    <div class="color-box">
+      <input type="color" id="borderColorPicker" value="#8c8c8c" />
+    </div>
+  </div>
 
-      <label>Active Color
-        <input type="color" id="colorInput" value="#ffcc00" />
-      </label>
+  <!-- MOVE BUILD GRID BUTTON HERE -->
+  <button id="buildGridBtn">Build / Update Grid</button>
 
-      <div class="color-section">
-        <h3>RGB</h3>
-        <div class="color-rgb-row">
-          <label>R
-            <input type="number" id="colorR" min="0" max="255" value="255" />
-          </label>
-          <label>G
-            <input type="number" id="colorG" min="0" max="255" value="204" />
-          </label>
-          <label>B
-            <input type="number" id="colorB" min="0" max="255" value="0" />
-          </label>
-        </div>
+  <!-- ACTIVE COLOR -->
+  <label>Active Color
+    <input type="color" id="colorInput" value="#ffcc00" />
+  </label>
 
-        <h3>Preset Colors</h3>
-        <div class="color-palette">
-          <div class="color-swatch" data-color="#ffffff" style="background:#ffffff;"></div>
-          <div class="color-swatch" data-color="#d9d9d9" style="background:#d9d9d9;"></div>
-          <div class="color-swatch" data-color="#555555" style="background:#555555;"></div>
-          <div class="color-swatch" data-color="#000000" style="background:#000000;"></div>
-          <div class="color-swatch" data-color="#ff0000" style="background:#ff0000;"></div>
-          <div class="color-swatch" data-color="#0066ff" style="background:#0066ff;"></div>
-          <div class="color-swatch" data-color="#00aa55" style="background:#00aa55;"></div>
-          <div class="color-swatch" data-color="#d4af37" style="background:#d4af37;"></div>
-        </div>
+  <!-- COLOR SECTION -->
+  <div class="color-section">
 
-        <h3>Saved Colors</h3>
-        <div class="color-saved-row">
-          <div class="color-swatch empty saved-swatch" data-index="0"></div>
-          <div class="color-swatch empty saved-swatch" data-index="1"></div>
-          <div class="color-swatch empty saved-swatch" data-index="2"></div>
-          <div class="color-swatch empty saved-swatch" data-index="3"></div>
-          <div class="color-swatch empty saved-swatch" data-index="4"></div>
-          <div class="color-swatch empty saved-swatch" data-index="5"></div>
-        </div>
-      </div>
-
-      <button id="buildGridBtn">Build / Update Grid</button>
-      <button id="toggleSashingBtn">Toggle Sashing On/Off</button>
-      <button id="toggleSashingBorderBtn">Toggle Sashing Border On/Off</button>
+    <h3>Preset Colors</h3>
+    <div class="color-palette">
+      <div class="color-swatch" data-color="#ffffff" style="background:#ffffff;"></div>
+      <div class="color-swatch" data-color="#d9d9d9" style="background:#d9d9d9;"></div>
+      <div class="color-swatch" data-color="#555555" style="background:#555555;"></div>
+      <div class="color-swatch" data-color="#000000" style="background:#000000;"></div>
+      <div class="color-swatch" data-color="#ff0000" style="background:#ff0000;"></div>
+      <div class="color-swatch" data-color="#0066ff" style="background:#0066ff;"></div>
+      <div class="color-swatch" data-color="#00aa55" style="background:#00aa55;"></div>
+      <div class="color-swatch" data-color="#d4af37" style="background:#d4af37;"></div>
     </div>
 
-    <!-- GRID PANEL -->
+    <h3>Saved Colors</h3>
+    <div class="color-saved-row">
+      <div class="color-swatch empty saved-swatch" data-index="0"></div>
+      <div class="color-swatch empty saved-swatch" data-index="1"></div>
+      <div class="color-swatch empty saved-swatch" data-index="2"></div>
+      <div class="color-swatch empty saved-swatch" data-index="3"></div>
+      <div class="color-swatch empty saved-swatch" data-index="4"></div>
+      <div class="color-swatch empty saved-swatch" data-index="5"></div>
+    </div>
+
+  </div>
+</div>
+
+      <!-- GRID PANEL -->
     <div class="panel grid-wrapper">
       <div class="zoom-row">
         <strong>Zoom:</strong>
@@ -119,13 +115,14 @@
 
   </div> <!-- end main-layout -->
 
-  <!-- CALCULATOR PANEL -->
+  <!-- SLIDE-OUT CALCULATOR PANEL -->
   <div id="calcPanel">
     <div id="calcTab">Calculators</div>
+
     <div id="calcPanelInner">
       <h2>Quilt Calculators</h2>
 
-      <!-- FABRIC YARDAGE -->
+      <!-- FABRIC CALCULATOR -->
       <label>Fabric width (WOF, inches)
         <input type="number" id="wofInput" value="42" min="20" />
       </label>
@@ -140,7 +137,7 @@
 
       <hr>
 
-      <!-- QUILT SIZE CALCULATOR -->
+      <!-- QUILT SIZE -->
       <h3>Quilt Size</h3>
       <div id="quiltSizeOutput" class="calc-output">
         Width: —<br>
@@ -149,30 +146,31 @@
 
       <hr>
 
-    <!-- STRIP CALCULATOR -->
-<h3>Strip Calculator</h3>
+      <!-- STRIP CALCULATOR -->
+      <h3>Strip Calculator</h3>
 
-<label>Sashing Strip Width (cut width, inches):
-    <input type="number" id="sashStripWidthInput" value="2" min="0" step="0.25">
-</label>
+      <label>Sashing Strip Width (cut width, inches):
+        <input type="number" id="sashStripWidthInput" value="2" min="0" step="0.25">
+      </label>
 
-<label>Binding Strip Width (cut width, inches):
-    <input type="number" id="bindingStripWidthInput" value="2.5" min="0" step="0.25">
-</label>
+      <label>Binding Strip Width (cut width, inches):
+        <input type="number" id="bindingStripWidthInput" value="2.5" min="0" step="0.25">
+      </label>
 
-<button id="calcStripsBtn">Calculate Strips</button>
+      <button id="calcStripsBtn">Calculate Strips</button>
 
-<div id="stripCalcOutput" class="calc-output">
-    Sashing Strips Needed: —<br>
-    Sashing Border Strips Needed: —<br>
-    Binding Strips Needed: —<br>
-    Total Strips: —<br>
-    Total Inches: —<br>
-    Yardage: —<br>
-</div>
-
+      <div id="stripCalcOutput" class="calc-output">
+        Sashing Strips Needed: —<br>
+        Sashing Border Strips Needed: —<br>
+        Binding Strips Needed: —<br>
+        Total Strips: —<br>
+        Total Inches: —<br>
+        Yardage: —<br>
       </div>
+
     </div>
+  </div>
+
   <!-- SCRIPT FILES -->
   <script src="js/grid.js"></script>
   <script src="js/color-system.js"></script>
