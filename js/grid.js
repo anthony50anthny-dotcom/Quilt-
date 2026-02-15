@@ -1,59 +1,83 @@
-// ===== GRID ELEMENTS =====
-window.quiltGrid = document.getElementById('quiltGrid');
-window.zoomSlider = document.getElementById('zoomSlider');
-window.zoomLabel = document.getElementById('zoomLabel');
+// =========================
+// ELEMENT REFERENCES
+// =========================
+window.quiltGrid = document.getElementById("quiltGrid");
+window.zoomSlider = document.getElementById("zoomSlider");
+window.zoomLabel = document.getElementById("zoomLabel");
 
-// ===== INPUTS =====
-window.rowsInput = document.getElementById('rowsInput');
-window.colsInput = document.getElementById('colsInput');
-window.blockWidthInput = document.getElementById('blockWidthInput');
-window.blockHeightInput = document.getElementById('blockHeightInput');
+// Inputs
+window.rowsInput = document.getElementById("rowsInput");
+window.colsInput = document.getElementById("colsInput");
+window.blockWidthInput = document.getElementById("blockWidthInput");
+window.blockHeightInput = document.getElementById("blockHeightInput");
 
-window.sashingWidthInput = document.getElementById('sashingWidthInput');
-window.sashingColorPicker = document.getElementById('sashingColorPicker');
+window.sashingWidthInput = document.getElementById("sashingWidthInput");
+window.sashingColorPicker = document.getElementById("sashingColorPicker");
 
-window.sashingBorderWidthInput = document.getElementById('sashingBorderWidthInput');
-window.sashingBorderColorPicker = document.getElementById('sashingBorderColorPicker');
+window.sashingBorderWidthInput = document.getElementById("sashingBorderWidthInput");
+window.sashingBorderColorPicker = document.getElementById("sashingBorderColorPicker");
 
-window.borderWidthInput = document.getElementById('borderWidthInput');
-window.borderColorPicker = document.getElementById('borderColorPicker');
+window.borderWidthInput = document.getElementById("borderWidthInput");
+window.borderColorPicker = document.getElementById("borderColorPicker");
 
-window.colorInput = document.getElementById('colorInput');
+window.colorInput = document.getElementById("colorInput");
 
-// ===== STATE =====
+// =========================
+// STATE
+// =========================
 window.sashingEnabled = true;
 window.sashingBorderEnabled = true;
 
-// ===== CONSTANTS =====
-window.pxPerInch = 20;
+// =========================
+// CONSTANTS
+// =========================
+window.pxPerInch = 20; // 1 inch = 1 cell = 20px
 
-// ===== GRID SIZE TRACKING =====
+// =========================
+// GRID SIZE (CELL COUNTS)
+// =========================
 window.gridCols = 0;
 window.gridRows = 0;
 
-// ===== ZOOM =====
+// =========================
+// ZOOM
+// =========================
 function updateZoom() {
   const val = parseInt(window.zoomSlider.value, 10) || 100;
-  window.quiltGrid.style.transform = `scale(${val / 100})`;
-  window.zoomLabel.textContent = val + '%';
+  const scale = val / 100;
+
+  quiltGrid.style.transform = `scale(${scale})`;
+  quiltGrid.style.transformOrigin = "top left";
+
+  window.zoomLabel.textContent = val + "%";
 }
 
-// ===== BUILD GRID =====
+// =========================
+// BUILD GRID
+// =========================
 function buildGrid() {
-  const rows = parseInt(window.rowsInput.value, 10) || 1;
-  const cols = parseInt(window.colsInput.value, 10) || 1;
-  const bw = parseInt(window.blockWidthInput.value, 10) || 1;
-  const bh = parseInt(window.blockHeightInput.value, 10) || 1;
+  const rows = parseInt(rowsInput.value, 10) || 1;
+  const cols = parseInt(colsInput.value, 10) || 1;
+  const bw = parseInt(blockWidthInput.value, 10) || 1;
+  const bh = parseInt(blockHeightInput.value, 10) || 1;
 
-  const sashW = parseInt(window.sashingWidthInput.value, 10) || 0;
-  const sashBorderW = (window.sashingBorderEnabled ? parseInt(window.sashingBorderWidthInput.value, 10) || 0 : 0);
-  const borderW = parseInt(window.borderWidthInput.value, 10) || 0;
+  const sashW = parseInt(sashingWidthInput.value, 10) || 0;
+  const sashBorderW = window.sashingBorderEnabled
+    ? parseInt(sashingBorderWidthInput.value, 10) || 0
+    : 0;
 
-  const sashColor = window.sashingColorPicker.value;
-  const sashBorderColor = window.sashingBorderColorPicker.value;
-  const borderColor = window.borderColorPicker.value;
+  const borderW = parseInt(borderWidthInput.value, 10) || 0;
 
-  window.quiltGrid.innerHTML = '';
+  const sashColor = sashingColorPicker.value;
+  const sashBorderColor = sashingBorderColorPicker.value;
+  const borderColor = borderColorPicker.value;
+
+  // Clear grid
+  quiltGrid.innerHTML = "";
+
+  // =========================
+  // DIMENSION MATH (IN INCHES = CELLS)
+  // =========================
 
   const coreWidthIn =
     cols * bw +
@@ -63,28 +87,30 @@ function buildGrid() {
     rows * bh +
     (window.sashingEnabled && sashW > 0 ? (rows - 1) * sashW : 0);
 
-  const totalWidthIn =
-    coreWidthIn + 2 * sashBorderW + 2 * borderW;
+  const totalWidthIn = coreWidthIn + 2 * sashBorderW + 2 * borderW;
+  const totalHeightIn = coreHeightIn + 2 * sashBorderW + 2 * borderW;
 
-  const totalHeightIn =
-    coreHeightIn + 2 * sashBorderW + 2 * borderW;
-
-  // Store grid dimensions for drag-fill indexing
+  // Store cell counts
   window.gridCols = totalWidthIn;
   window.gridRows = totalHeightIn;
 
-  window.quiltGrid.style.gridTemplateColumns =
-    `repeat(${totalWidthIn}, ${window.pxPerInch}px)`;
-  window.quiltGrid.style.gridTemplateRows =
-    `repeat(${totalHeightIn}, ${window.pxPerInch}px)`;
+  // Apply CSS grid sizing
+  quiltGrid.style.gridTemplateColumns =
+    `repeat(${totalWidthIn}, ${pxPerInch}px)`;
+  quiltGrid.style.gridTemplateRows =
+    `repeat(${totalHeightIn}, ${pxPerInch}px)`;
 
+  // =========================
+  // BUILD CELLS
+  // =========================
   for (let r = 0; r < totalHeightIn; r++) {
     for (let c = 0; c < totalWidthIn; c++) {
-      const mini = document.createElement('div');
-      mini.className = 'mini';
+      const mini = document.createElement("div");
+      mini.className = "mini";
 
-      let color = '#ffffff';
+      let color = "#ffffff";
 
+      // BORDER REGION
       const inBorder =
         borderW > 0 &&
         (r < borderW ||
@@ -92,23 +118,29 @@ function buildGrid() {
          c < borderW ||
          c >= totalWidthIn - borderW);
 
+      // SASH BORDER REGION
       const inSashBorder =
         sashBorderW > 0 &&
         r >= borderW &&
         r < totalHeightIn - borderW &&
         c >= borderW &&
         c < totalWidthIn - borderW &&
-        (r < borderW + sashBorderW ||
-         r >= totalHeightIn - borderW - sashBorderW ||
-         c < borderW + sashBorderW ||
-         c >= totalWidthIn - borderW - sashBorderW);
+        (
+          r < borderW + sashBorderW ||
+          r >= totalHeightIn - borderW - sashBorderW ||
+          c < borderW + sashBorderW ||
+          c >= totalWidthIn - borderW - sashBorderW
+        );
 
+      // CORE REGION
       const coreTop = borderW + sashBorderW;
       const coreLeft = borderW + sashBorderW;
       const coreBottom = totalHeightIn - borderW - sashBorderW;
       const coreRight = totalWidthIn - borderW - sashBorderW;
 
+      // SASHING REGION
       let inSashing = false;
+
       if (
         window.sashingEnabled &&
         sashW > 0 &&
@@ -125,6 +157,7 @@ function buildGrid() {
 
         const blockRowIndex = Math.floor(coreR / repeatH);
         const posInRepeatH = coreR % repeatH;
+
         const blockColIndex = Math.floor(coreC / repeatW);
         const posInRepeatW = coreC % repeatW;
 
@@ -141,6 +174,7 @@ function buildGrid() {
         inSashing = isHorizontalSash || isVerticalSash;
       }
 
+      // COLOR PRIORITY
       if (inBorder) {
         color = borderColor;
       } else if (inSashBorder) {
@@ -151,18 +185,18 @@ function buildGrid() {
 
       mini.style.backgroundColor = color;
 
-      mini.addEventListener('click', () => {
+      // CLICK TO FILL
+      mini.addEventListener("click", () => {
         mini.style.backgroundColor = window.colorInput.value;
       });
 
-      window.quiltGrid.appendChild(mini);
+      quiltGrid.appendChild(mini);
     }
   }
 }
 
-
 // =========================
-// DRAG-TO-FILL (Rectangle Fill)
+// DRAG-TO-FILL
 // =========================
 
 let isDragging = false;
@@ -170,7 +204,7 @@ let dragStart = null;
 let dragEnd = null;
 let selectionBox = null;
 
-// Convert mouse position to grid cell (ZOOM AWARE)
+// Convert mouse to cell (zoom aware)
 function getCellFromMouse(event) {
   const rect = quiltGrid.getBoundingClientRect();
   const zoom = parseInt(window.zoomSlider.value, 10) / 100;
@@ -178,8 +212,8 @@ function getCellFromMouse(event) {
   const x = (event.clientX - rect.left) / zoom;
   const y = (event.clientY - rect.top) / zoom;
 
-  const col = Math.floor(x / window.pxPerInch);
-  const row = Math.floor(y / window.pxPerInch);
+  const col = Math.floor(x / pxPerInch);
+  const row = Math.floor(y / pxPerInch);
 
   return { row, col };
 }
@@ -194,12 +228,11 @@ function ensureSelectionBox() {
     selectionBox.style.pointerEvents = "none";
     selectionBox.style.zIndex = "50";
 
-    // IMPORTANT: attach to quiltGrid, not its parent
     quiltGrid.appendChild(selectionBox);
   }
 }
 
-// Update selection rectangle visuals
+// Update selection rectangle
 function updateSelectionBox() {
   if (!dragStart || !dragEnd) return;
 
@@ -208,10 +241,10 @@ function updateSelectionBox() {
   const minCol = Math.min(dragStart.col, dragEnd.col);
   const maxCol = Math.max(dragStart.col, dragEnd.col);
 
-  const top = minRow * window.pxPerInch;
-  const left = minCol * window.pxPerInch;
-  const width = (maxCol - minCol + 1) * window.pxPerInch;
-  const height = (maxRow - minRow + 1) * window.pxPerInch;
+  const top = minRow * pxPerInch;
+  const left = minCol * pxPerInch;
+  const width = (maxCol - minCol + 1) * pxPerInch;
+  const height = (maxRow - minRow + 1) * pxPerInch;
 
   ensureSelectionBox();
   selectionBox.style.display = "block";
@@ -221,7 +254,7 @@ function updateSelectionBox() {
   selectionBox.style.height = height + "px";
 }
 
-// Fill all cells in rectangle
+// Fill rectangle
 function fillRectangle() {
   if (!dragStart || !dragEnd) return;
 
@@ -269,7 +302,6 @@ document.addEventListener("mouseup", () => {
   dragEnd = null;
 });
 
-
-// ===== EXPORTS =====
+// Exports
 window.buildGrid = buildGrid;
 window.updateZoom = updateZoom;
