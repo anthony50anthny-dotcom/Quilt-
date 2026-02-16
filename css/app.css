@@ -82,6 +82,7 @@ select {
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  background: #ffffff;
 }
 
 .color-box input[type="color"] {
@@ -89,10 +90,6 @@ select {
   inset: 0;
   opacity: 0;
   cursor: pointer;
-.color-box {
-  background: #ffffff; /* default */
-}
-
 }
 
 /* BUTTONS */
@@ -220,7 +217,6 @@ select {
 
 /* ========================= */
 /* SLIDE-OUT CALCULATOR PANEL */
-/* (Tab is FIXED so it never disappears) */
 /* ========================= */
 
 #calcPanel {
@@ -229,70 +225,15 @@ select {
   right: 0;
   height: calc(100% - 100px);
   width: 400px;
-
   background: #ffffff;
   box-shadow: -2px 0 6px rgba(0,0,0,0.15);
   border-radius: 8px 0 0 8px;
-
   display: flex;
   flex-direction: column;
-
-  /* CLOSED: fully off-screen */
   transform: translateX(390px);
   transition: transform 0.25s ease;
-
-  z-index: 10000000;
-}
-
-/* ========================= */
-/* SLIDE-OUT CALCULATOR PANEL */
-/* ========================= */
-
-#calcPanel {
-  position: fixed;
-  top: 80px;
-  right: 0;
-  height: calc(100% - 100px);
-  width: 400px;
-  background: #ffffff;
-  box-shadow: -2px 0 6px rgba(0,0,0,0.15);
-  border-radius: 8px 0 0 8px;
-  display: flex;
-  flex-direction: column;
-
-  /* CLOSED: leave tab visible */
-  transform: translateX(350px);
-  transition: transform 0.25s ease;
-
   z-index: 9999;
-  overflow-y: auto;
-  overflow-x: visible; /* allow tab to stick out */
-}
-
-#calcPanel.open {
-  transform: translateX(0);
-}
-
-#calcPanel {
-  position: fixed;
-  top: 80px;
-  right: 0;
-  height: calc(100% - 100px);
-  width: 400px;
-  background: #ffffff;
-  box-shadow: -2px 0 6px rgba(0,0,0,0.15);
-  border-radius: 8px 0 0 8px;
-  display: flex;
-  flex-direction: column;
-
-  /* CLOSED: leave the 50px tab visible */
-  transform: translateX(390px);
-  transition: transform 0.25s ease;
-
-  z-index: 9999;
-
-  overflow-y: auto;
-  overflow-x: visible; /* <- THIS is what makes the tab show */
+  overflow: visible;
 }
 
 #calcPanel.open {
@@ -384,25 +325,12 @@ body.dark .calc-output {
 body.dark .dark-toggle {
   background: #444;
 }
-/* ==== FORCE CALC TAB TO SHOW (debug + usually the real fix) ==== */
-#calcPanel {
-  overflow: visible !important;   /* not just overflow-x */
+
+body.dark #quiltOuter {
+  background: #2b2b2b;
+  border-color: #555;
 }
 
-#calcTab {
-  position: absolute !important;
-  left: -50px !important;
-  top: 40% !important;
-  transform: none !important;
-
-  width: 50px !important;
-  height: 140px !important;
-
-  display: flex !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-
-  z-index: 999999 !important;     /* if it was behind something */
-  pointer-events: auto !important;
+body.dark #quiltGrid {
+  background: #555;
 }
-

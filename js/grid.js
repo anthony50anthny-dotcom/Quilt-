@@ -30,6 +30,7 @@ window.fabricImageURL = window.fabricImageURL || null;
 // =========================
 window.sashingEnabled = true;
 window.sashingBorderEnabled = true;
+window.fabricRepeatInches = 6;
 
 // =========================
 // CONSTANTS
