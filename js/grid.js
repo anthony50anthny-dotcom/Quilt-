@@ -22,6 +22,9 @@ window.borderColorPicker = document.getElementById("borderColorPicker");
 
 window.colorInput = document.getElementById("colorInput");
 
+// Fabric image (set in main.js)
+window.fabricImageURL = window.fabricImageURL || null;
+
 // =========================
 // STATE
 // =========================
@@ -31,13 +34,13 @@ window.sashingBorderEnabled = true;
 // =========================
 // CONSTANTS
 // =========================
-window.pxPerInch = 20; // 1 inch = 1 cell = 20px
+window.pxPerInch = 20;
 
 // =========================
-// GRID SIZE (CELL COUNTS)
+// GRID SIZE (stored in INCHES)
 // =========================
-window.gridCols = 0;
-window.gridRows = 0;
+window.gridCols = 0; // inches
+window.gridRows = 0; // inches
 
 // =========================
 // ZOOM
@@ -47,9 +50,60 @@ function updateZoom() {
   const scale = val / 100;
 
   quiltGrid.style.transform = `scale(${scale})`;
-  quiltGrid.style.transformOrigin = "top left";
+  quiltGrid.style.transformOrigin = "top center";
 
   window.zoomLabel.textContent = val + "%";
+}
+
+// =========================
+// SMART AUTO-FIT (ONLY IF TOO BIG)
+// =========================
+function autoFitIfNeeded() {
+  const outer = document.getElementById("quiltOuter");
+  if (!outer || !window.quiltGrid) return;
+
+  // TRUE grid size in pixels (inches * pxPerInch)
+  const gridWidthPx = window.gridCols * window.pxPerInch;
+  const gridHeightPx = window.gridRows * window.pxPerInch;
+
+  // Available size in pixels inside quiltOuter (minus padding)
+  const styles = getComputedStyle(outer);
+  const padX = parseFloat(styles.paddingLeft) + parseFloat(styles.paddingRight);
+  const padY = parseFloat(styles.paddingTop) + parseFloat(styles.paddingBottom);
+
+  const availW = outer.clientWidth - padX;
+  const availH = outer.clientHeight - padY;
+
+  if (availW <= 0 || availH <= 0) return;
+
+  // If it already fits at 100%, do nothing
+  if (gridWidthPx <= availW && gridHeightPx <= availH) return;
+
+  // Fit scale (only zoom OUT)
+  const scale = Math.min(availW / gridWidthPx, availH / gridHeightPx);
+
+  // Slider range is 50–200 in your HTML; keep within that
+  const percent = Math.max(50, Math.min(200, Math.floor(scale * 100)));
+
+  window.zoomSlider.value = percent;
+  updateZoom();
+}
+
+// =========================
+// FABRIC TILE LOGIC
+// =========================
+function applyFabricToCell(cell, r, c) {
+  const repeatInches = window.fabricRepeatInches || 6;
+  const tileSize = repeatInches * window.pxPerInch;
+
+  const offsetX = -(c % repeatInches) * window.pxPerInch;
+  const offsetY = -(r % repeatInches) * window.pxPerInch;
+
+  cell.style.backgroundImage = `url(${window.fabricImageURL})`;
+  cell.style.backgroundSize = `${tileSize}px ${tileSize}px`;
+  cell.style.backgroundRepeat = "repeat";
+  cell.style.backgroundPosition = `${offsetX}px ${offsetY}px`;
+  cell.style.backgroundColor = "transparent";
 }
 
 // =========================
@@ -72,12 +126,7 @@ function buildGrid() {
   const sashBorderColor = sashingBorderColorPicker.value;
   const borderColor = borderColorPicker.value;
 
-  // Clear grid
   quiltGrid.innerHTML = "";
-
-  // =========================
-  // DIMENSION MATH (IN INCHES = CELLS)
-  // =========================
 
   const coreWidthIn =
     cols * bw +
@@ -90,11 +139,10 @@ function buildGrid() {
   const totalWidthIn = coreWidthIn + 2 * sashBorderW + 2 * borderW;
   const totalHeightIn = coreHeightIn + 2 * sashBorderW + 2 * borderW;
 
-  // Store cell counts
+  // Store in INCHES
   window.gridCols = totalWidthIn;
   window.gridRows = totalHeightIn;
 
-  // Apply CSS grid sizing
   quiltGrid.style.gridTemplateColumns =
     `repeat(${totalWidthIn}, ${pxPerInch}px)`;
   quiltGrid.style.gridTemplateRows =
@@ -108,7 +156,9 @@ function buildGrid() {
       const mini = document.createElement("div");
       mini.className = "mini";
 
-      let color = "#ffffff";
+      mini.style.backgroundColor = "#ffffff";
+      mini.style.backgroundImage = "none";
+      mini.style.border = "1px solid rgba(0,0,0,0.15)";
 
       // BORDER REGION
       const inBorder =
@@ -176,49 +226,57 @@ function buildGrid() {
 
       // COLOR PRIORITY
       if (inBorder) {
-        color = borderColor;
+        mini.style.backgroundColor = borderColor;
       } else if (inSashBorder) {
-        color = sashBorderColor;
+        mini.style.backgroundColor = sashBorderColor;
       } else if (inSashing) {
-        color = sashColor;
+        mini.style.backgroundColor = sashColor;
       }
 
-      mini.style.backgroundColor = color;
-
+      // =========================
       // CLICK TO FILL
+      // =========================
       mini.addEventListener("click", () => {
-        mini.style.backgroundColor = window.colorInput.value;
+        if (window.fabricImageURL) {
+          applyFabricToCell(mini, r, c);
+        } else {
+          mini.style.backgroundImage = "none";
+          mini.style.backgroundColor = window.colorInput.value;
+        }
       });
 
       quiltGrid.appendChild(mini);
     }
   }
+
+  // After rebuild, auto-fit only if it won't fit
+  autoFitIfNeeded();
+
+  // Update size label if calculator.js provided it
+  if (window.updateQuiltSizeDisplay) window.updateQuiltSizeDisplay();
 }
 
 // =========================
 // DRAG-TO-FILL
 // =========================
-
 let isDragging = false;
 let dragStart = null;
 let dragEnd = null;
 let selectionBox = null;
 
-// Convert mouse to cell (zoom aware)
 function getCellFromMouse(event) {
   const rect = quiltGrid.getBoundingClientRect();
-  const zoom = parseInt(window.zoomSlider.value, 10) / 100;
+  const zoom = (parseInt(window.zoomSlider.value, 10) || 100) / 100;
 
   const x = (event.clientX - rect.left) / zoom;
   const y = (event.clientY - rect.top) / zoom;
 
-  const col = Math.floor(x / pxPerInch);
-  const row = Math.floor(y / pxPerInch);
-
-  return { row, col };
+  return {
+    row: Math.floor(y / pxPerInch),
+    col: Math.floor(x / pxPerInch)
+  };
 }
 
-// Create selection overlay
 function ensureSelectionBox() {
   if (!selectionBox) {
     selectionBox = document.createElement("div");
@@ -227,12 +285,10 @@ function ensureSelectionBox() {
     selectionBox.style.border = "2px solid #0078d7";
     selectionBox.style.pointerEvents = "none";
     selectionBox.style.zIndex = "50";
-
     quiltGrid.appendChild(selectionBox);
   }
 }
 
-// Update selection rectangle
 function updateSelectionBox() {
   if (!dragStart || !dragEnd) return;
 
@@ -241,20 +297,14 @@ function updateSelectionBox() {
   const minCol = Math.min(dragStart.col, dragEnd.col);
   const maxCol = Math.max(dragStart.col, dragEnd.col);
 
-  const top = minRow * pxPerInch;
-  const left = minCol * pxPerInch;
-  const width = (maxCol - minCol + 1) * pxPerInch;
-  const height = (maxRow - minRow + 1) * pxPerInch;
-
   ensureSelectionBox();
   selectionBox.style.display = "block";
-  selectionBox.style.top = top + "px";
-  selectionBox.style.left = left + "px";
-  selectionBox.style.width = width + "px";
-  selectionBox.style.height = height + "px";
+  selectionBox.style.top = minRow * pxPerInch + "px";
+  selectionBox.style.left = minCol * pxPerInch + "px";
+  selectionBox.style.width = (maxCol - minCol + 1) * pxPerInch + "px";
+  selectionBox.style.height = (maxRow - minRow + 1) * pxPerInch + "px";
 }
 
-// Fill rectangle
 function fillRectangle() {
   if (!dragStart || !dragEnd) return;
 
@@ -267,16 +317,20 @@ function fillRectangle() {
 
   for (let r = minRow; r <= maxRow; r++) {
     for (let c = minCol; c <= maxCol; c++) {
-      const index = r * window.gridCols + c;
+      const index = r * window.gridCols + c; // gridCols is inches count
       const cell = children[index];
-      if (cell) {
+      if (!cell) continue;
+
+      if (window.fabricImageURL) {
+        applyFabricToCell(cell, r, c);
+      } else {
+        cell.style.backgroundImage = "none";
         cell.style.backgroundColor = window.colorInput.value;
       }
     }
   }
 }
 
-// Mouse events
 quiltGrid.addEventListener("mousedown", (e) => {
   isDragging = true;
   dragStart = getCellFromMouse(e);
@@ -302,6 +356,14 @@ document.addEventListener("mouseup", () => {
   dragEnd = null;
 });
 
-// Exports
+// Fit again if the window size changes
+window.addEventListener("resize", () => {
+  autoFitIfNeeded();
+});
+
+// =========================
+// EXPORTS
+// =========================
 window.buildGrid = buildGrid;
 window.updateZoom = updateZoom;
+window.autoFitIfNeeded = autoFitIfNeeded;
