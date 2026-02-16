@@ -1,3 +1,408 @@
+/* ========================= */
+/* GLOBAL */
+/* ========================= */
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background: #f5f5f5;
+}
+
+h1 {
+  margin: 0 0 16px 0;
+}
+
+/* ========================= */
+/* MAIN LAYOUT */
+/* ========================= */
+
+.main-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  margin-top: 20px;
+}
+
+.panel {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* ========================= */
+/* LEFT CONTROL PANEL */
+/* ========================= */
+
+.controls {
+  width: 380px;
+  font-size: 15px;
+}
+
+.controls h2 {
+  margin-top: 0;
+}
+
+.controls label {
+  display: block;
+  margin-top: 12px;
+}
+
+.inline-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.inline-row input[type="number"] {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+input[type="text"],
+input[type="file"],
+select {
+  width: 100%;
+  padding: 6px;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+/* COLOR PICKER BOXES */
+
+.color-box {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.color-box input[type="color"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
 .color-box {
   background: #ffffff; /* default */
 }
+
+}
+
+/* BUTTONS */
+
+.controls button {
+  margin-top: 12px;
+  padding: 10px;
+  width: 100%;
+  border: none;
+  border-radius: 4px;
+  background: #0077cc;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.controls button:hover {
+  background: #005fa3;
+}
+
+/* ========================= */
+/* COLOR SECTION */
+/* ========================= */
+
+/* Hide RGB controls but keep them in the DOM for color-system.js */
+.rgb-section {
+  display: none;
+}
+
+.color-section {
+  margin-top: 20px;
+  padding-top: 10px;
+  border-top: 1px solid #ddd;
+}
+
+.color-section h3 {
+  margin: 8px 0 6px 0;
+  font-size: 14px;
+}
+
+/* COLOR PALETTES */
+
+.color-palette,
+.color-saved-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.color-saved-row {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+.color-swatch {
+  width: 100%;
+  padding-bottom: 100%;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  position: relative;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.color-swatch.empty::before {
+  content: '+';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #888;
+}
+
+/* ========================= */
+/* GRID WRAPPER */
+/* ========================= */
+
+.grid-wrapper {
+  flex: 1;
+  min-width: 900px;
+}
+
+.zoom-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+#quiltOuter {
+  border: 1px solid #ccc;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  overflow: auto;
+
+  display: flex;
+  justify-content: center;  /* centers horizontally */
+  align-items: flex-start;  /* keep top aligned */
+
+  height: 80vh;
+  min-height: 600px;
+}
+
+#quiltGrid {
+  display: grid;
+  position: relative;
+  background: #ccc;
+  padding: 2px;
+  margin: 0 auto;
+  transform-origin: top center; /* zoom stays centered */
+}
+
+.mini {
+  width: 20px;
+  height: 20px;
+  border: 1px solid rgba(0,0,0,0.25);
+  box-sizing: border-box;
+  background: #ffffff;
+  transition: background-color 0.15s ease;
+}
+
+/* ========================= */
+/* SLIDE-OUT CALCULATOR PANEL */
+/* (Tab is FIXED so it never disappears) */
+/* ========================= */
+
+#calcPanel {
+  position: fixed;
+  top: 80px;
+  right: 0;
+  height: calc(100% - 100px);
+  width: 400px;
+
+  background: #ffffff;
+  box-shadow: -2px 0 6px rgba(0,0,0,0.15);
+  border-radius: 8px 0 0 8px;
+
+  display: flex;
+  flex-direction: column;
+
+  /* CLOSED: fully off-screen */
+  transform: translateX(390px);
+  transition: transform 0.25s ease;
+
+  z-index: 10000000;
+}
+
+/* ========================= */
+/* SLIDE-OUT CALCULATOR PANEL */
+/* ========================= */
+
+#calcPanel {
+  position: fixed;
+  top: 80px;
+  right: 0;
+  height: calc(100% - 100px);
+  width: 400px;
+  background: #ffffff;
+  box-shadow: -2px 0 6px rgba(0,0,0,0.15);
+  border-radius: 8px 0 0 8px;
+  display: flex;
+  flex-direction: column;
+
+  /* CLOSED: leave tab visible */
+  transform: translateX(350px);
+  transition: transform 0.25s ease;
+
+  z-index: 9999;
+  overflow-y: auto;
+  overflow-x: visible; /* allow tab to stick out */
+}
+
+#calcPanel.open {
+  transform: translateX(0);
+}
+
+#calcPanel {
+  position: fixed;
+  top: 80px;
+  right: 0;
+  height: calc(100% - 100px);
+  width: 400px;
+  background: #ffffff;
+  box-shadow: -2px 0 6px rgba(0,0,0,0.15);
+  border-radius: 8px 0 0 8px;
+  display: flex;
+  flex-direction: column;
+
+  /* CLOSED: leave the 50px tab visible */
+  transform: translateX(390px);
+  transition: transform 0.25s ease;
+
+  z-index: 9999;
+
+  overflow-y: auto;
+  overflow-x: visible; /* <- THIS is what makes the tab show */
+}
+
+#calcPanel.open {
+  transform: translateX(0);
+}
+
+#calcTab {
+  position: absolute;
+  left: -50px;
+  top: 40%;
+  width: 50px;
+  height: 140px;
+  background: #0077cc;
+  color: #fff;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 8px 0 0 8px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+#calcPanelInner {
+  padding: 16px;
+}
+
+/* CALCULATOR OUTPUT */
+
+.calc-output {
+  margin-top: 8px;
+  font-family: Consolas, monospace;
+  white-space: pre-line;
+  font-size: 13px;
+  background: #fafafa;
+  border: 1px solid #eee;
+  padding: 6px;
+  border-radius: 4px;
+}
+
+#stripCalcOutput {
+  line-height: 1.4;
+}
+
+/* ========================= */
+/* DARK MODE */
+/* ========================= */
+
+body.dark {
+  background: #1e1e1e;
+  color: #e6e6e6;
+}
+
+body.dark .panel,
+body.dark #calcPanel {
+  background: #2b2b2b;
+  color: #e6e6e6;
+}
+
+body.dark input,
+body.dark select {
+  background: #3a3a3a;
+  color: #ffffff;
+  border: 1px solid #666;
+}
+
+body.dark .calc-output {
+  background: #3a3a3a;
+  border-color: #555;
+  color: #ffffff;
+}
+
+/* Dark Mode Toggle Button */
+.dark-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: #0077cc;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+body.dark .dark-toggle {
+  background: #444;
+}
+/* ==== FORCE CALC TAB TO SHOW (debug + usually the real fix) ==== */
+#calcPanel {
+  overflow: visible !important;   /* not just overflow-x */
+}
+
+#calcTab {
+  position: absolute !important;
+  left: -50px !important;
+  top: 40% !important;
+  transform: none !important;
+
+  width: 50px !important;
+  height: 140px !important;
+
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+
+  z-index: 999999 !important;     /* if it was behind something */
+  pointer-events: auto !important;
+}
+
