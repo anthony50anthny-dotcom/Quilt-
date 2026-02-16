@@ -31,6 +31,7 @@ window.fabricImageURL = window.fabricImageURL || null;
 window.sashingEnabled = true;
 window.sashingBorderEnabled = true;
 window.fabricRepeatInches = 6;
+window.fabricModeActive = false;
 
 // =========================
 // CONSTANTS
@@ -238,7 +239,7 @@ function buildGrid() {
       // CLICK TO FILL
       // =========================
       mini.addEventListener("click", () => {
-        if (window.fabricImageURL) {
+        if (window.fabricImageURL && window.fabricModeActive) {
           applyFabricToCell(mini, r, c);
         } else {
           mini.style.backgroundImage = "none";
@@ -322,7 +323,7 @@ function fillRectangle() {
       const cell = children[index];
       if (!cell) continue;
 
-      if (window.fabricImageURL) {
+      if (window.fabricImageURL && window.fabricModeActive) {
         applyFabricToCell(cell, r, c);
       } else {
         cell.style.backgroundImage = "none";

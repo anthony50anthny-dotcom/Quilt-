@@ -111,6 +111,20 @@ select {
   background: #005fa3;
 }
 
+.controls button:disabled {
+  background: #aaa;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+#fabricToggleBtn.fabric-active {
+  background: #2a9d4e;
+}
+
+#fabricToggleBtn.fabric-active:hover {
+  background: #21883f;
+}
+
 /* ========================= */
 /* COLOR SECTION */
 /* ========================= */
