@@ -45,6 +45,47 @@ if (calcPanel && calcTab) {
 }
 
 // =========================
+// FABRIC UPLOAD
+// =========================
+document.getElementById("fabricUpload").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    window.fabricImageURL = evt.target.result;
+    window.fabricModeActive = true;
+    const btn = document.getElementById("fabricToggleBtn");
+    btn.disabled = false;
+    btn.textContent = "Fabric Mode: On";
+    btn.classList.add("fabric-active");
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById("fabricRepeatInput").addEventListener("input", () => {
+  const val = parseFloat(document.getElementById("fabricRepeatInput").value);
+  if (val > 0) window.fabricRepeatInches = val;
+});
+
+document.getElementById("fabricToggleBtn").addEventListener("click", () => {
+  window.fabricModeActive = !window.fabricModeActive;
+  const btn = document.getElementById("fabricToggleBtn");
+  btn.textContent = window.fabricModeActive ? "Fabric Mode: On" : "Fabric Mode: Off";
+  btn.classList.toggle("fabric-active", window.fabricModeActive);
+});
+
+document.getElementById("clearFabricBtn").addEventListener("click", () => {
+  window.fabricImageURL = null;
+  window.fabricModeActive = false;
+  document.getElementById("fabricUpload").value = "";
+  const btn = document.getElementById("fabricToggleBtn");
+  btn.disabled = true;
+  btn.textContent = "Fabric Mode: Off";
+  btn.classList.remove("fabric-active");
+});
+
+// =========================
 // INIT
 // =========================
 buildGrid();

@@ -79,6 +79,14 @@
         <input type="file" id="fabricUpload" accept="image/*" />
       </label>
 
+      <label>Fabric repeat size (inches)
+        <input type="number" id="fabricRepeatInput" value="6" min="1" step="0.5" />
+      </label>
+
+      <button id="fabricToggleBtn" disabled>Fabric Mode: Off</button>
+
+      <button id="clearFabricBtn">Clear Fabric</button>
+
       <!-- ACTIVE COLOR -->
       <label>Active Color
         <input type="color" id="colorInput" value="#ffcc00" />
