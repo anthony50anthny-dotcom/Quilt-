@@ -7,6 +7,9 @@ body {
   margin: 0;
   padding: 20px;
   background: #f5f5f5;
+  display: block;
+  min-height: unset;
+  color: inherit;
 }
 
 h1 {
@@ -38,6 +41,7 @@ h1 {
 .controls {
   width: 380px;
   font-size: 15px;
+  flex-shrink: 0;
 }
 
 .controls h2 {
@@ -64,6 +68,7 @@ h1 {
 }
 
 input[type="text"],
+input[type="number"],
 input[type="file"],
 select {
   width: 100%;
@@ -77,12 +82,12 @@ select {
 .color-box {
   width: 32px;
   height: 32px;
+  flex-shrink: 0;
   border-radius: 4px;
   border: 1px solid #ccc;
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  background: #ffffff;
 }
 
 .color-box input[type="color"] {
@@ -90,6 +95,8 @@ select {
   inset: 0;
   opacity: 0;
   cursor: pointer;
+  width: 100%;
+  height: 100%;
 }
 
 /* BUTTONS */
@@ -117,22 +124,17 @@ select {
   opacity: 0.6;
 }
 
-#fabricToggleBtn.fabric-active {
+.controls button.fabric-active {
   background: #2a9d4e;
 }
 
-#fabricToggleBtn.fabric-active:hover {
+.controls button.fabric-active:hover {
   background: #21883f;
 }
 
 /* ========================= */
 /* COLOR SECTION */
 /* ========================= */
-
-/* Hide RGB controls but keep them in the DOM for color-system.js */
-.rgb-section {
-  display: none;
-}
 
 .color-section {
   margin-top: 20px;
@@ -186,7 +188,7 @@ select {
 
 .grid-wrapper {
   flex: 1;
-  min-width: 900px;
+  min-width: 0;
 }
 
 .zoom-row {
@@ -202,31 +204,11 @@ select {
   padding: 20px;
   border-radius: 8px;
   overflow: auto;
-
   display: flex;
-  justify-content: center;  /* centers horizontally */
-  align-items: flex-start;  /* keep top aligned */
-
+  justify-content: center;
+  align-items: flex-start;
   height: 80vh;
   min-height: 600px;
-}
-
-#quiltGrid {
-  display: grid;
-  position: relative;
-  background: #ccc;
-  padding: 2px;
-  margin: 0 auto;
-  transform-origin: top center; /* zoom stays centered */
-}
-
-.mini {
-  width: 20px;
-  height: 20px;
-  border: 1px solid rgba(0,0,0,0.25);
-  box-sizing: border-box;
-  background: #ffffff;
-  transition: background-color 0.15s ease;
 }
 
 /* ========================= */
@@ -275,6 +257,39 @@ select {
 
 #calcPanelInner {
   padding: 16px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+#calcPanelInner label {
+  display: block;
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+#calcPanelInner input[type="number"] {
+  width: 100%;
+  padding: 6px;
+  box-sizing: border-box;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+#calcPanelInner button {
+  margin-top: 12px;
+  padding: 10px;
+  width: 100%;
+  border: none;
+  border-radius: 4px;
+  background: #0077cc;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+#calcPanelInner button:hover {
+  background: #005fa3;
 }
 
 /* CALCULATOR OUTPUT */
@@ -288,6 +303,7 @@ select {
   border: 1px solid #eee;
   padding: 6px;
   border-radius: 4px;
+  min-height: 24px;
 }
 
 #stripCalcOutput {
@@ -343,8 +359,4 @@ body.dark .dark-toggle {
 body.dark #quiltOuter {
   background: #2b2b2b;
   border-color: #555;
-}
-
-body.dark #quiltGrid {
-  background: #555;
 }
