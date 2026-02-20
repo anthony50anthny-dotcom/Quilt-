@@ -19,6 +19,9 @@ export function GridViewer() {
   const fabricImgRef = useRef<HTMLImageElement | null>(null);
   const drag = useRef<DragState>({ isDragging: false, startRow: 0, startCol: 0, endRow: 0, endCol: 0 });
   const [selBox, setSelBox] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
+  const [toolMode, setToolMode] = useState<'paint' | 'select'>('paint');
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const zoomRef = useRef(state.zoom);
 
   // Load fabric image when URL changes
   useEffect(() => {
@@ -30,6 +33,9 @@ export function GridViewer() {
     img.onload = () => { fabricImgRef.current = img; };
     img.src = state.fabricImageURL;
   }, [state.fabricImageURL]);
+
+  // Keep zoomRef current so wheel handler always reads the latest zoom
+  useEffect(() => { zoomRef.current = state.zoom; }, [state.zoom]);
 
   // Redraw canvas whenever grid state changes
   useEffect(() => {
@@ -85,22 +91,42 @@ export function GridViewer() {
     state.fabricRepeatInches, state.fabricImageURL,
   ]);
 
-  // Auto-fit zoom after grid builds
+  // Auto-fit zoom and center grid after grid builds
   useEffect(() => {
     if (state.gridCols === 0 || !outerRef.current) return;
     const outer = outerRef.current;
-    const styles = getComputedStyle(outer);
-    const padX = parseFloat(styles.paddingLeft) + parseFloat(styles.paddingRight);
-    const padY = parseFloat(styles.paddingTop) + parseFloat(styles.paddingBottom);
-    const availW = outer.clientWidth - padX;
-    const availH = outer.clientHeight - padY;
+    const availW = outer.clientWidth;
+    const availH = outer.clientHeight;
     const gridW = state.gridCols * PX_PER_INCH;
     const gridH = state.gridRows * PX_PER_INCH;
-    if (gridW <= availW && gridH <= availH) return;
-    const scale = Math.min(availW / gridW, availH / gridH);
-    const pct = Math.max(50, Math.min(200, Math.floor(scale * 100)));
-    dispatch({ type: 'SET_ZOOM', value: pct });
+
+    let zoom = state.zoom;
+    if (gridW > availW || gridH > availH) {
+      const scale = Math.min(availW / gridW, availH / gridH);
+      zoom = Math.max(50, Math.min(200, Math.floor(scale * 100)));
+      dispatch({ type: 'SET_ZOOM', value: zoom });
+    }
+
+    setPanOffset({
+      x: (availW - gridW * (zoom / 100)) / 2,
+      y: (availH - gridH * (zoom / 100)) / 2,
+    });
   }, [state.gridCols, state.gridRows]);
+
+  // Wheel-to-zoom in Move mode (re-registers when toolMode changes)
+  useEffect(() => {
+    const outer = outerRef.current;
+    if (!outer) return;
+    function handleWheel(e: WheelEvent) {
+      e.preventDefault();
+      if (toolMode === 'select') {
+        const newZoom = Math.max(50, Math.min(200, Math.round(zoomRef.current - e.deltaY / 3)));
+        dispatch({ type: 'SET_ZOOM', value: newZoom });
+      }
+    }
+    outer.addEventListener('wheel', handleWheel, { passive: false });
+    return () => outer.removeEventListener('wheel', handleWheel);
+  }, [toolMode]);
 
   function getCellFromEvent(e: React.MouseEvent<HTMLCanvasElement>): { row: number; col: number } {
     const canvas = canvasRef.current!;
@@ -118,7 +144,32 @@ export function GridViewer() {
     return state.fabricImageURL && state.fabricModeActive ? FABRIC_MARKER : state.activeColor;
   }
 
+  function startPan(e: React.MouseEvent<HTMLCanvasElement>) {
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startOffset = { ...panOffset };
+
+    function onMove(ev: MouseEvent) {
+      setPanOffset({
+        x: startOffset.x + (ev.clientX - startX),
+        y: startOffset.y + (ev.clientY - startY),
+      });
+    }
+
+    function onUp() {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    }
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  }
+
   function handleMouseDown(e: React.MouseEvent<HTMLCanvasElement>) {
+    if (toolMode === 'select') {
+      startPan(e);
+      return;
+    }
     const { row, col } = getCellFromEvent(e);
     drag.current = { isDragging: true, startRow: row, startCol: col, endRow: row, endCol: col };
     setSelBox(boxStyle(row, col, row, col));
@@ -165,6 +216,20 @@ export function GridViewer() {
   return (
     <div className="panel grid-wrapper">
       <div className="zoom-row">
+        <div className="tool-mode-group">
+          <button
+            className={`tool-btn${toolMode === 'paint' ? ' active' : ''}`}
+            onClick={() => setToolMode('paint')}
+          >
+            ✏ Paint
+          </button>
+          <button
+            className={`tool-btn${toolMode === 'select' ? ' active' : ''}`}
+            onClick={() => setToolMode('select')}
+          >
+            ✥ Move
+          </button>
+        </div>
         <strong>Zoom:</strong>
         <input
           type="range" min={50} max={200} value={state.zoom}
@@ -174,45 +239,43 @@ export function GridViewer() {
       </div>
 
       <div id="quiltOuter" ref={outerRef}>
-        <div
-          style={{
-            transform: `scale(${state.zoom / 100})`,
-            transformOrigin: 'top center',
-            position: 'relative',
-            display: 'inline-block',
-          }}
-        >
-          {state.gridCols > 0 && (
-            <>
-              <canvas
-                ref={canvasRef}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                style={{ display: 'block', cursor: 'crosshair' }}
+        {state.gridCols === 0 ? (
+          <div style={{ padding: 40, color: '#999' }}>
+            Click <strong>Build / Update Grid</strong> to render the quilt.
+          </div>
+        ) : (
+          <div
+            style={{
+              position: 'absolute',
+              left: panOffset.x,
+              top: panOffset.y,
+              transform: `scale(${state.zoom / 100})`,
+              transformOrigin: 'top left',
+            }}
+          >
+            <canvas
+              ref={canvasRef}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              style={{ display: 'block', cursor: toolMode === 'select' ? 'grab' : 'crosshair' }}
+            />
+            {selBox && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: selBox.top,
+                  left: selBox.left,
+                  width: selBox.width,
+                  height: selBox.height,
+                  background: 'rgba(0,120,215,0.25)',
+                  border: '2px solid #0078d7',
+                  pointerEvents: 'none',
+                }}
               />
-              {selBox && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: selBox.top,
-                    left: selBox.left,
-                    width: selBox.width,
-                    height: selBox.height,
-                    background: 'rgba(0,120,215,0.25)',
-                    border: '2px solid #0078d7',
-                    pointerEvents: 'none',
-                  }}
-                />
-              )}
-            </>
-          )}
-          {state.gridCols === 0 && (
-            <div style={{ padding: 40, color: '#999' }}>
-              Click <strong>Build / Update Grid</strong> to render the quilt.
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
